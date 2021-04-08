@@ -31,18 +31,6 @@ ENV NODE_VERSION 15.6.0
 ENV NVM_DIR /usr/local/nvm
 RUN mkdir -p $NVM_DIR && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 
-# install node and npm
-RUN . $NVM_DIR/nvm.sh \
-     && nvm install $NODE_VERSION \
-     && nvm alias default $NODE_VERSION \
-     && nvm use default
-
-# add node and npm to path so the commands are available
-ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
-ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
-# confirm installation
-RUN node -v
-RUN npm -v
 # 2. apache configs + document root
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
@@ -86,10 +74,7 @@ WORKDIR /var/www/html
 
 # Install dependencies
 RUN composer install --optimize-autoloader --no-dev
-RUN npm install
 
-RUN php artisan route:cache && php artisan view:cache
 RUN composer dump-autoload
 
-# Npm run
-RUN npm run production
+CMD php -S 0.0.0.0:80 -t public

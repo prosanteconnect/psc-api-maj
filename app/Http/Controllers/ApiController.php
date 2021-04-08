@@ -1,10 +1,9 @@
 <?php
 
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 
-use App\Http\Controllers\Controller;
 use App\Models\Ps;
 use App\Models\Structure;
 use App\Psc\Transformers\ExpertiseTransformer;
@@ -71,7 +70,7 @@ class ApiController extends Controller
     protected function getPsOrFail($psId) : Ps
     {
         try {
-            $ps = Ps::findOrFail($psId);
+            $ps = Ps::findOrFail(urldecode($psId));
         } catch(ModelNotFoundException $e) {
             $this->notFoundResponse("Ce professionel n'exist pas.")->send();
             die();

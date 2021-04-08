@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Models\Ps;
 
+use Illuminate\Support\Facades\Validator;
 use Exception;
 
 class PsController extends ApiController
@@ -89,39 +90,39 @@ class PsController extends ApiController
     /**
      * Display the specified resource.
      *
-     * @param $id
+     * @param $psId
      * @return mixed
      */
-    public function show($id)
+    public function show($psId)
     {
-        $ps = $this->getPsOrFail($id);
-        return $this->successResponse($this->psTransformer->transform($ps));
+        $psId = $this->getPsOrFail($psId);
+        return $this->successResponse($this->psTransformer->transform($psId));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param $id
+     * @param $psId
      * @return mixed
      */
-    public function update($id)
+    public function update($psId)
     {
-        $ps = $this->getPsOrFail($id);
-        $ps->update(array_filter(request()->all()));
+        $psId = $this->getPsOrFail($psId);
+        $psId->update(array_filter(request()->all()));
         return $this->successResponse(null, 'Mise à jour du Ps avec succès.');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param $id
+     * @param $psId
      * @return mixed
      * @throws Exception
      */
-    public function destroy($id)
+    public function destroy($psId)
     {
-        $ps = $this->getPsOrFail($id);
-        $ps->delete();
+        $psId = $this->getPsOrFail($psId);
+        $psId->delete();
         return $this->successResponse(null, 'Supression du Ps avec succès.');
     }
 
@@ -183,7 +184,8 @@ class PsController extends ApiController
             'required' => ':attribute est obligatoir.',
             'unique' => ':attribute existe déjà.'
         ];
-        $ps = request()->validate($rules, $customMessages);
+
+        $ps = Validator::make(request()->all(), $rules, $customMessages)->validate();
         foreach ($ps['professions'] as &$profession) {
             $profession['exProId'] = ( isset($profession['code']) ? $profession['code'] : '' )
                 .( isset($profession['categoryCode']) ? $profession['categoryCode'] : '' );

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Models\Structure;
 use Exception;
@@ -34,24 +34,24 @@ class StructureController extends ApiController
     /**
      * Display the specified resource.
      *
-     * @param $id
+     * @param $structureId
      * @return mixed
      */
-    public function show($id)
+    public function show($structureId)
     {
-        $structure = $this->getStructureOrFail($id);
+        $structure = $this->getStructureOrFail($structureId);
         return $this->successResponse($this->structureTransformer->transform($structure));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param $id
+     * @param $structureId
      * @return mixed
      */
-    public function update($id)
+    public function update($structureId)
     {
-        $structure = $this->getStructureOrFail($id);
+        $structure = $this->getStructureOrFail($structureId);
         $structure->update(array_filter(request()->all()));
         return $this->successResponse(null, 'Mise à jour de la Structure avec succès.');
     }
@@ -59,13 +59,13 @@ class StructureController extends ApiController
     /**
      * Remove the specified resource from storage.
      *
-     * @param $id
+     * @param $structureId
      * @return mixed
      * @throws Exception
      */
-    public function destroy($id)
+    public function destroy($structureId)
     {
-        $structure = $this->getStructureOrFail($id);
+        $structure = $this->getStructureOrFail($structureId);
         $structure->delete();
         return $this->successResponse(null, 'Supression de la Structure avec succès.');
     }
