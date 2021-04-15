@@ -1,4 +1,4 @@
-FROM php:8.0.1-apache-buster
+FROM php:apache-buster
 
 # app version, set with docker build --build-arg version=v0.0.2
 ARG version=main
@@ -26,10 +26,6 @@ RUN apt-get install -y \
     g++ \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/*
-
-ENV NODE_VERSION 15.6.0
-ENV NVM_DIR /usr/local/nvm
-RUN mkdir -p $NVM_DIR && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 
 # 2. apache configs + document root
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
@@ -66,7 +62,7 @@ RUN useradd -G www-data,root -u 1000 -d /home/devuser devuser
 RUN mkdir -p /home/devuser/.composer && \
     chown -R devuser:devuser /home/devuser
 
-RUN cd /var/www/html && wget https://github.com/prosanteconnect/psc-ws-maj/archive/$version.tar.gz && \
+RUN cd /var/www/html && wget https://github.com/prosanteconnect/psc-api-maj/archive/$version.tar.gz && \
     tar -xzf $version.tar.gz --strip 1 && rm $version.tar.gz
 
 # Setup working directory
