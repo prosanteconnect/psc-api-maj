@@ -65,6 +65,22 @@ class ApiController extends Controller
 
     /**
      * @param $psId
+     * @return bool
+     */
+    protected function isNewPs($psId) : bool
+    {
+        $ps = Ps::find(urldecode($psId));
+
+        if ($ps) {
+            $this->alreadyExistsResponse("Ce professionel existe déjà.")->send();
+            die();
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $psId
      * @return Ps
      */
     protected function getPsOrFail($psId) : Ps

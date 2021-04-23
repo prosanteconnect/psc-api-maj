@@ -72,5 +72,3 @@ WORKDIR /var/www/html
 RUN composer install --optimize-autoloader --no-dev
 
 RUN composer dump-autoload
-
-CMD php -S 0.0.0.0:80 -t public
