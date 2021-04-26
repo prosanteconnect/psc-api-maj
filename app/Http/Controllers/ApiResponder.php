@@ -4,6 +4,8 @@
 namespace App\Http\Controllers;
 
 
+use Illuminate\Http\JsonResponse;
+
 trait ApiResponder
 {
 
@@ -34,9 +36,10 @@ trait ApiResponder
     /**
      * @param $message
      * @param $code
-     * @return mixed
+     * @return JsonResponse
      */
-    public function errorResponse($message, $code){
+    public function errorResponse($message, $code): JsonResponse
+    {
         return response()->json([
             'status'=>'Error',
             'message' => $message,
@@ -47,9 +50,9 @@ trait ApiResponder
     /**
      * @param $data
      * @param null $message
-     * @return mixed
+     * @return JsonResponse
      */
-    public function successResponse($data, $message = null)
+    public function successResponse($data, $message = null): JsonResponse
     {
         return response()->json([
             'status'=> 'Success',

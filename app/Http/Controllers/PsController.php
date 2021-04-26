@@ -26,9 +26,10 @@ class PsController extends ApiController
      */
     public function store()
     {
-        $ps = $this->validatePs();
-        Ps::create($ps);
-
+        $id = request()->nationalId;
+        if ($this->isNewPs($id)) {
+            Ps::create($this->validatePs());
+        }
         return $this->successResponse(null, 'Creation du Ps avec succès');
     }
 
@@ -46,7 +47,13 @@ class PsController extends ApiController
             return $this->store();
         }
 
-        $psData = $this->getNested($this->validatePs(), 'professions');
+        $validatedPs = $this->validatePs();
+
+        if (!is_array($validatedPs)) {
+            return $validatedPs;
+        }
+
+        $psData = $this->getNested($validatedPs, 'professions');
         $ps->update($psData['itself']);
 
         foreach ($psData['professions'] as $professionData) {
@@ -131,7 +138,7 @@ class PsController extends ApiController
         return [
             'idType' => 'nullable|string',
             'id' => 'nullable|string',
-            'nationalId' => 'required|unique:ps',
+            'nationalId' => 'required', //'required|unique:ps',
             'lastName' => 'nullable|string',
             'firstName' => 'nullable|string',
             'dateOfBirth' => 'nullable|string',
@@ -177,7 +184,7 @@ class PsController extends ApiController
         ];
     }
 
-    private function validatePs(): array
+    private function validatePs()
     {
         $rules = array_merge($this->psRules(), $this->exProRules(), $this->expertiseRules(), $this->situationRules());
         $customMessages = [
@@ -185,7 +192,14 @@ class PsController extends ApiController
             'unique' => ':attribute existe déjà.'
         ];
 
-        $ps = Validator::make(request()->all(), $rules, $customMessages)->validate();
+        $validator = Validator::make(request()->all(), $rules, $customMessages);
+
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors()->first(), 500);
+        }
+
+        $ps = $validator->validate();
+
         foreach ($ps['professions'] as &$profession) {
             $profession['exProId'] = ( isset($profession['code']) ? $profession['code'] : '' )
                 .( isset($profession['categoryCode']) ? $profession['categoryCode'] : '' );
