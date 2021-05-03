@@ -57,7 +57,7 @@ class PsController extends ApiController
         $ps->update($psData['itself']);
 
         foreach ($psData['professions'] as $professionData) {
-            $professionData['exProId'] = $professionData['code'].$professionData['categoryCode'];
+            $professionData['exProId'] = $professionData['code'] ?? ''.$professionData['categoryCode'] ?? '';
 
             $profession = $ps->professions()->firstWhere('exProId', $professionData['exProId']);
             if (!$profession) {
@@ -68,7 +68,7 @@ class PsController extends ApiController
 
             $expertises = $this->getNested($professionData, 'expertises')['expertises'];
             foreach ($expertises as $expertiseData) {
-                $expertiseData['expertiseId'] = $expertiseData['code'].$expertiseData['categoryCode'];
+                $expertiseData['expertiseId'] = $expertiseData['code'] ?? ''.$expertiseData['categoryCode'] ?? '';
 
                 $expertise = $profession->expertises()->firstWhere('expertiseId', $expertiseData['expertiseId']);
                 if (!$expertise) {
@@ -80,7 +80,7 @@ class PsController extends ApiController
 
             $situations = $this->getNested($professionData, 'workSituations')['workSituations'];
             foreach ($situations as $situationData) {
-                $situationData['situId'] = $situationData['roleCode'].$situationData['modeCode'];
+                $situationData['situId'] = $situationData['roleCode'] ?? ''.$situationData['modeCode'] ?? '';
 
                 $situation = $profession->workSituations()->firstWhere('situId', $situationData['situId']);
                 if (!$situation) {
@@ -201,16 +201,12 @@ class PsController extends ApiController
         $ps = $validator->validate();
 
         foreach ($ps['professions'] as &$profession) {
-            $profession['exProId'] = ( isset($profession['code']) ? $profession['code'] : '' )
-                .( isset($profession['categoryCode']) ? $profession['categoryCode'] : '' );
-
+            $profession['exProId'] = $profession['code'] ?? ''.$profession['categoryCode'] ?? '';
             foreach ($profession['expertises'] as &$expertise) {
-                $expertise['expertiseId'] = ( isset($expertise['code']) ? $expertise['code'] : '' )
-                    .( isset($expertise['categoryCode']) ? $expertise['categoryCode'] : '' );
+                $expertise['expertiseId'] = $expertise['code'] ?? ''.$expertise['categoryCode'] ?? '';
             }
             foreach ($profession['workSituations'] as &$situation) {
-                $situation['situId'] = ( isset($situation['roleCode']) ? $situation['roleCode'] : '' )
-                    .( isset($situation['modeCode']) ? $situation['modeCode'] : '' );
+                $situation['situId'] = $situation['roleCode'] ?? ''.$situation['modeCode'] ?? '';
             }
         }
         return $ps;
