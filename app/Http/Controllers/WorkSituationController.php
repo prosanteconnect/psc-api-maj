@@ -30,7 +30,7 @@ class WorkSituationController extends ApiController
     {
         $profession = $this->getExProOrFail($psId, $exProId);
         $situation = array_filter(request()->all());
-        $situation['situId'] = $situation['roleCode'].$situation['modeCode'];
+        $situation['situId'] = $situation['roleCode'] ?? ''.$situation['modeCode'] ?? '';
 
         $profession->workSituations()->create($situation);
         return $this->successResponse(null, "Creation de la situation d'exercise avec succès.");
