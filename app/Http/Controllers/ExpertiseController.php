@@ -30,7 +30,7 @@ class ExpertiseController extends ApiController
     {
         $profession = $this->getExProOrFail($psId, $exProId);
         $expertise = array_filter(request()->all());
-        $expertise['expertiseId'] = $expertise['code'] ?? ''.$expertise['categoryCode'] ?? '';
+        $expertise['expertiseId'] = ($expertise['code'] ?? '').($expertise['categoryCode'] ?? '');
 
         $profession->expertises()->create($expertise);
         return $this->successResponse(null, "Creation de l'expertise avec succès.");
