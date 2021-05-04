@@ -27,7 +27,7 @@ class ProfessionController extends ApiController
     {
         $ps = $this->getPsOrFail($psId);
         $profession = array_filter(request()->all());
-        $profession['exProId'] = $profession['code'] ?? ''.$profession['categoryCode'] ?? '';
+        $profession['exProId'] = ($profession['code'] ?? '').($profession['categoryCode'] ?? '');
 
         $ps->professions()->create($profession);
         return $this->successResponse(null, "Creation de l'exercice professionnel avec succès.");
