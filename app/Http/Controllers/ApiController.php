@@ -12,12 +12,13 @@ use App\Psc\Transformers\PsTransformer;
 use App\Psc\Transformers\StructureTransformer;
 use App\Psc\Transformers\WorkSituationTransformer;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Laravel\Lumen\Routing\Controller as BaseController;
 
 /**
  * Class ApiController
  * @package App\Http\Controllers\Api
  */
-class ApiController extends Controller
+class ApiController extends BaseController
 {
     use ApiResponder;
 
