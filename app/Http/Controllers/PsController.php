@@ -9,6 +9,22 @@ use Exception;
 
 class PsController extends ApiController
 {
+
+    private $rules;
+    private $customMessages = [
+        'required' => ':attribute est obligatoire.',
+        'unique' => ':attribute existe déjà.'
+    ];
+
+    /**
+     * Create a new controller instance.
+     *
+     */
+    public function __construct()
+    {
+        $this->rules = array_merge($this->psRules(), $this->exProRules(), $this->expertiseRules(), $this->situationRules());
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -40,11 +56,12 @@ class PsController extends ApiController
      */
     public function storeOrUpdate()
     {
-        $id = request()->nationalId;
-        $ps = Ps::find($id);
+        $psId = request()->nationalId;
+        $ps = Ps::find(urldecode($psId));
 
         if(!$ps) {
-            return $this->store();
+            Ps::create($this->validatePs());
+            return $this->successResponse(null, 'Creation du Ps avec succès');
         }
 
         $validatedPs = $this->validatePs();
@@ -186,13 +203,7 @@ class PsController extends ApiController
 
     private function validatePs()
     {
-        $rules = array_merge($this->psRules(), $this->exProRules(), $this->expertiseRules(), $this->situationRules());
-        $customMessages = [
-            'required' => ':attribute est obligatoir.',
-            'unique' => ':attribute existe déjà.'
-        ];
-
-        $validator = Validator::make(request()->all(), $rules, $customMessages);
+        $validator = Validator::make(request()->all(), $this->rules, $this->customMessages);
 
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors()->first(), 500);
