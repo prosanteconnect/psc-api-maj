@@ -22,6 +22,7 @@ class PsController extends ApiController
      */
     public function __construct()
     {
+        parent::__construct();
         $this->rules = array_merge($this->psRules(), $this->exProRules(), $this->expertiseRules(), $this->situationRules());
     }
 
