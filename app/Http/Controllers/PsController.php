@@ -58,17 +58,16 @@ class PsController extends ApiController
     public function storeOrUpdate()
     {
         $psId = request()->nationalId;
+        $validatedPs = $this->validatePs();
         $ps = Ps::find(urldecode($psId));
 
         if(!$ps) {
-            Ps::create($this->validatePs());
-            return $this->successResponse(null, 'Creation du Ps avec succès');
-        }
-
-        $validatedPs = $this->validatePs();
-
-        if (!is_array($validatedPs)) {
-            return $validatedPs;
+            try {
+                Ps::create($validatedPs);
+                return $this->successResponse(null, 'Creation du Ps avec succès');
+            } catch (Exception $e) { // in case of concurrent create in DB
+                $ps = Ps::find(urldecode($psId));
+            }
         }
 
         $psData = $this->getNested($validatedPs, 'professions');
@@ -207,7 +206,8 @@ class PsController extends ApiController
         $validator = Validator::make(request()->all(), $this->rules, $this->customMessages);
 
         if ($validator->fails()) {
-            return $this->errorResponse($validator->errors()->first(), 500);
+            $this->errorResponse($validator->errors()->first(), 500)->send();
+            die();
         }
 
         $ps = $validator->validate();
