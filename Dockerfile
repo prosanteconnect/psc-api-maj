@@ -74,4 +74,6 @@ RUN composer install --optimize-autoloader --no-dev
 
 RUN composer dump-autoload
 
+RUN php artisan migrate
+
 RUN sed -i '/^exec.*/i mv \/secrets\/.env \/var\/www\/html\/.env' /usr/local/bin/apache2-foreground

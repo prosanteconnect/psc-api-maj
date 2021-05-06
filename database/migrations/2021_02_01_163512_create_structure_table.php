@@ -39,7 +39,6 @@ class CreateStructureTable extends Migration
             $collection->string('departmentCode')->nullable();
             $collection->string('oldStructureId')->nullable();
             $collection->string('registrationAuthority')->nullable();
-            $collection->timestamps();
         });
     }
 

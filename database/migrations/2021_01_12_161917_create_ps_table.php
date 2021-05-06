@@ -17,10 +17,8 @@ class CreatePsTable extends Migration
             $collection->string('nationalId')->unique();
             $collection->string('email')->nullable();
             $collection->string('phone')->nullable();
-            $collection->string('employeeType')->nullable();
             $collection->string('firstName')->nullable();
             $collection->string('lastName')->nullable();
-            $collection->timestamps();
         });
     }
 
