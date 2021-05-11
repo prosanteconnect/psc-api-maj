@@ -30,7 +30,7 @@ class ProfessionController extends ApiController
         $profession['exProId'] = ($profession['code'] ?? '').($profession['categoryCode'] ?? '');
 
         $ps->professions()->create($profession);
-        return $this->successResponse(null, "Creation de l'exercice professionnel avec succès.");
+        return $this->successResponse($this->printId($psId, $profession['exProId']), "Creation de l'exercice professionnel avec succès.");
     }
 
     /**
@@ -59,7 +59,7 @@ class ProfessionController extends ApiController
         $updatedProfession = array_filter(request()->all());
 
         $profession->update($updatedProfession, ['upsert' => false]);
-        return $this->successResponse(null, "Mise à jour de l'exercise pro avec succès.");
+        return $this->successResponse($this->printId($psId, $exProId), "Mise à jour de l'exercise pro avec succès.");
     }
 
     /**
@@ -73,7 +73,12 @@ class ProfessionController extends ApiController
     {
         $profession = $this->getExProOrFail($psId, $exProId);
         $profession->delete();
-        return $this->successResponse(null, "Suppression de l'exercise pro avec succès.");
+        return $this->successResponse($this->printId($psId, $exProId), "Suppression de l'exercise pro avec succès.");
+    }
+
+    private function printId($psId, $exProId)
+    {
+        return array('nationalId'=>urldecode($psId), 'exProId'=>$exProId);
     }
 
 }

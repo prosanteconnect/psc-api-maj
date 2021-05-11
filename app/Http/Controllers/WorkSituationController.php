@@ -33,7 +33,8 @@ class WorkSituationController extends ApiController
         $situation['situId'] = ($situation['roleCode'] ?? '').($situation['modeCode'] ?? '');
 
         $profession->workSituations()->create($situation);
-        return $this->successResponse(null, "Creation de la situation d'exercise avec succès.");
+        return $this->successResponse($this->printId($psId, $exProId, $situation['situId']),
+            "Creation de la situation d'exercise avec succès.");
     }
 
     /**
@@ -64,7 +65,8 @@ class WorkSituationController extends ApiController
         $updatedSituation = array_filter(request()->all());
 
         $situation->update($updatedSituation, ['upsert' => false]);
-        return $this->successResponse(null, "Mise à jour de la situation d'exercise avec succès.");
+        return $this->successResponse($this->printId($psId, $exProId, $situId),
+            "Mise à jour de la situation d'exercise avec succès.");
     }
 
     /**
@@ -80,6 +82,12 @@ class WorkSituationController extends ApiController
         $situation = $this->getSituationOrFail($psId, $exProId, $situId);
 
         $situation->delete();
-        return $this->successResponse(null, "Suppression de la situation d'exercise avec succès.");
+        return $this->successResponse($this->printId($psId, $exProId, $situId),
+            "Suppression de la situation d'exercise avec succès.");
+    }
+
+    private function printId($psId, $exProId, $situId)
+    {
+        return array('nationalId'=>urldecode($psId), 'exProId'=>$exProId, 'situId'=>$situId);
     }
 }

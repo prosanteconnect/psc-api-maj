@@ -14,7 +14,7 @@ class StructureController extends ApiController
      */
     public function index()
     {
-        $structures = Structure::all();
+        $structures = Structure::paginate(10);
         return $this->successResponse($this->structureTransformer->transformCollection($structures->all()));
     }
 
@@ -28,7 +28,7 @@ class StructureController extends ApiController
         $structure = array_filter(request()->all());
 
         Structure::create($structure);
-        return $this->successResponse(null, 'Creation avec succès');
+        return $this->successResponse($this->printId($structure['structureTechnicalId']), 'Creation avec succès');
     }
 
     /**
@@ -53,7 +53,7 @@ class StructureController extends ApiController
     {
         $structure = $this->getStructureOrFail($structureId);
         $structure->update(array_filter(request()->all()));
-        return $this->successResponse(null, 'Mise à jour de la Structure avec succès.');
+        return $this->successResponse($this->printId($structureId), 'Mise à jour de la Structure avec succès.');
     }
 
     /**
@@ -67,7 +67,12 @@ class StructureController extends ApiController
     {
         $structure = $this->getStructureOrFail($structureId);
         $structure->delete();
-        return $this->successResponse(null, 'Supression de la Structure avec succès.');
+        return $this->successResponse($this->printId($structureId), 'Supression de la Structure avec succès.');
+    }
+
+    private function printId($structureId)
+    {
+        return array('structureId'=>urldecode($structureId));
     }
 
 }

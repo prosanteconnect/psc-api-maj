@@ -46,18 +46,20 @@ class Handler extends ExceptionHandler
      * Render an exception into an HTTP response.
      *
      * @param Request  $request
-     * @param Throwable $exception
+     * @param Throwable $e
      * @return Response|JsonResponse
      *
      * @throws Throwable
      */
-    public function render($request, Throwable $exception)
+    public function render($request, Throwable $e)
     {
-        $rendered = parent::render($request, $exception);
+        $rendered = parent::render($request, $e);
 
         return response()->json([
-            'status'=>'Error',
-            'message' => $exception->getMessage(),
+            'status'=> 'Error',
+            'method'=> $request->method(),
+            'uri' => $request->path(),
+            'message' => $e->getMessage(),
             'code' => $rendered->getStatusCode()
         ], $rendered->getStatusCode());
     }

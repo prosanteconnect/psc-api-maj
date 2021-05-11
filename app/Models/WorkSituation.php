@@ -22,7 +22,8 @@ class WorkSituation extends Model {
         'modeCode',
         'activitySectorCode',
         'pharmacistTableSectionCode',
-        'roleCode'
+        'roleCode',
+        'structure'
     ];
 
     /**

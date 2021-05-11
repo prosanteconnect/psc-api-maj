@@ -73,7 +73,8 @@ class ApiController extends BaseController
         $ps = Ps::find(urldecode($psId));
 
         if ($ps) {
-            $this->alreadyExistsResponse("Ce professionel existe déjà.")->send();
+            $this->alreadyExistsResponse("Ce professionel existe déjà.",
+                array('nationalId'=>urldecode($psId)))->send();
             die();
         }
 
@@ -89,7 +90,8 @@ class ApiController extends BaseController
         try {
             $ps = Ps::findOrFail(urldecode($psId));
         } catch(ModelNotFoundException $e) {
-            $this->notFoundResponse("Ce professionel n'exist pas.")->send();
+            $this->notFoundResponse("Ce professionel n'exist pas.",
+                array('nationalId'=>urldecode($psId)))->send();
             die();
         }
         return $ps;
@@ -104,7 +106,8 @@ class ApiController extends BaseController
         try {
             $structure = Structure::findOrFail($structureId);
         } catch(ModelNotFoundException $e) {
-            $this->notFoundResponse("Cette structure n'existe pas.")->send();
+            $this->notFoundResponse("Cette structure n'existe pas.",
+                array('structureId'=>$structureId))->send();
             die();
         }
         return $structure;
@@ -120,7 +123,8 @@ class ApiController extends BaseController
         $ps = $this->getPsOrFail($psId);
         $profession = $ps->professions()->firstWhere('exProId', $exProId);
         if (! $profession) {
-            $this->notFoundResponse("Cet exercice professionnel n'exist pas.")->send();
+            $this->notFoundResponse("Cet exercice professionnel n'exist pas.",
+                array('nationalId'=>urldecode($psId), 'exProId'=>$exProId))->send();
             die();
         }
         return $profession;
@@ -136,7 +140,8 @@ class ApiController extends BaseController
         $profession = $this->getExProOrFail($psId, $exProId);
         $expertise = $profession->expertises()->firstWhere('expertiseId', $expertiseId);
         if (! $expertise) {
-            $this->notFoundResponse("Ce savoir fair n'exist pas.")->send();
+            $this->notFoundResponse("Ce savoir fair n'exist pas.",
+                array('nationalId'=>urldecode($psId), 'exProId'=>$exProId, 'expertiseId'=>$expertiseId))->send();
             die();
         }
         return $expertise;
@@ -152,7 +157,8 @@ class ApiController extends BaseController
         $profession = $this->getExProOrFail($psId, $exProId);
         $situation = $profession->workSituations()->firstWhere('situId', $situId);
         if (! $situation) {
-            $this->notFoundResponse("Cette situation d'exercise n'exist pas.")->send();
+            $this->notFoundResponse("Cette situation d'exercise n'exist pas.",
+                array('nationalId'=>urldecode($psId), 'exProId'=>$exProId, 'situId'=>$situId))->send();
             die();
         }
         return $situation;
