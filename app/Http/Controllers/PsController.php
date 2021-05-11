@@ -32,7 +32,7 @@ class PsController extends ApiController
      */
     public function index()
     {
-        $psList = Ps::all();
+        $psList = Ps::paginate(10);
         return $this->successResponse($this->psTransformer->transformCollection($psList->all()));
     }
 
@@ -43,11 +43,11 @@ class PsController extends ApiController
      */
     public function store()
     {
-        $id = request()->nationalId;
-        if ($this->isNewPs($id)) {
+        $psId = request()->nationalId;
+        if ($this->isNewPs($psId)) {
             Ps::create($this->validatePs());
         }
-        return $this->successResponse(null, 'Creation du Ps avec succès');
+        return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès');
     }
 
     /**
@@ -64,7 +64,7 @@ class PsController extends ApiController
         if(!$ps) {
             try {
                 Ps::create($validatedPs);
-                return $this->successResponse(null, 'Creation du Ps avec succès');
+                return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès');
             } catch (Exception $e) { // in case of concurrent create in DB
                 $ps = Ps::find(urldecode($psId));
             }
@@ -107,8 +107,7 @@ class PsController extends ApiController
                 }
             }
         }
-
-        return $this->successResponse(null, 'Mise à jour du Ps avec succès.');
+        return $this->successResponse($this->printId($psId), 'Mise à jour du Ps avec succès.');
     }
 
     /**
@@ -119,8 +118,8 @@ class PsController extends ApiController
      */
     public function show($psId)
     {
-        $psId = $this->getPsOrFail($psId);
-        return $this->successResponse($this->psTransformer->transform($psId));
+        $ps = $this->getPsOrFail($psId);
+        return $this->successResponse($this->psTransformer->transform($ps));
     }
 
     /**
@@ -131,9 +130,9 @@ class PsController extends ApiController
      */
     public function update($psId)
     {
-        $psId = $this->getPsOrFail($psId);
-        $psId->update(array_filter(request()->all()));
-        return $this->successResponse(null, 'Mise à jour du Ps avec succès.');
+        $ps = $this->getPsOrFail($psId);
+        $ps->update(array_filter(request()->all()));
+        return $this->successResponse($this->printId($psId), 'Mise à jour du Ps avec succès.');
     }
 
     /**
@@ -145,9 +144,9 @@ class PsController extends ApiController
      */
     public function destroy($psId)
     {
-        $psId = $this->getPsOrFail($psId);
-        $psId->delete();
-        return $this->successResponse(null, 'Supression du Ps avec succès.');
+        $ps = $this->getPsOrFail($psId);
+        $ps->delete();
+        return $this->successResponse($this->printId($psId), 'Supression du Ps avec succès.');
     }
 
     private function psRules(): array
@@ -222,6 +221,11 @@ class PsController extends ApiController
             }
         }
         return $ps;
+    }
+
+    private function printId($psId)
+    {
+        return array('nationalId'=>urldecode($psId));
     }
 
 }

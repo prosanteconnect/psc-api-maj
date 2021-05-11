@@ -11,39 +11,43 @@ trait ApiResponder
 
     /**
      * @param string $message
+     * @param null $data
      * @return mixed
      */
-    public function notFoundResponse($message = 'Not found!'){
-        return $this->errorResponse($message, 404);
+    public function notFoundResponse($message = 'Not found!', $data = null){
+        return $this->errorResponse($message, 404, $data);
     }
 
     /**
      * @param string $message
+     * @param null $data
      * @return mixed
      */
-    public function alreadyExistsResponse($message = 'Already exists!'){
-        return $this->errorResponse($message, 409);
+    public function alreadyExistsResponse($message = 'Already exists!', $data = null){
+        return $this->errorResponse($message, 409, $data);
     }
 
     /**
      * @param string $message
+     * @param null $data
      * @return mixed
      */
-    public function internalErrorResponse($message = 'Internal Error!'){
-        return $this->errorResponse($message, 500);
+    public function internalErrorResponse($message = 'Internal Error!', $data = null){
+        return $this->errorResponse($message, 500, $data);
     }
 
     /**
      * @param $message
      * @param $code
+     * @param null $data
      * @return JsonResponse
      */
-    public function errorResponse($message, $code): JsonResponse
+    public function errorResponse($message, $code, $data = null): JsonResponse
     {
         return response()->json([
             'status'=>'Error',
             'message' => $message,
-            'data' => null
+            'data' => $data
         ], $code);
     }
 

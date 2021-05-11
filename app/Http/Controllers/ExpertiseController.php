@@ -33,7 +33,7 @@ class ExpertiseController extends ApiController
         $expertise['expertiseId'] = ($expertise['code'] ?? '').($expertise['categoryCode'] ?? '');
 
         $profession->expertises()->create($expertise);
-        return $this->successResponse(null, "Creation de l'expertise avec succès.");
+        return $this->successResponse($this->printId($psId, $exProId, $expertise['expertiseId']), "Creation de l'expertise avec succès.");
 
     }
 
@@ -65,7 +65,7 @@ class ExpertiseController extends ApiController
         $updatedExpertise = array_filter(request()->all());
 
         $expertise->update($updatedExpertise, ['upsert' => false]);
-        return $this->successResponse(null, "Mise à jour du savoir faire avec succès.");
+        return $this->successResponse($this->printId($psId, $exProId, $expertiseId), "Mise à jour du savoir faire avec succès.");
 
     }
 
@@ -82,6 +82,11 @@ class ExpertiseController extends ApiController
         $expertise = $this->getExpertiseOrFail($psId, $exProId, $expertiseId);
 
         $expertise->delete();
-        return $this->successResponse(null, "Suppression de l'expertise avec succès.");
+        return $this->successResponse($this->printId($psId, $exProId, $expertiseId), "Suppression de l'expertise avec succès.");
+    }
+
+    private function printId($psId, $exProId, $expertiseId)
+    {
+        return array('nationalId'=>urldecode($psId), 'exProId'=>$exProId, 'expertiseId'=>$expertiseId);
     }
 }
