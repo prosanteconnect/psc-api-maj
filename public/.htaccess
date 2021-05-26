@@ -7,15 +7,18 @@
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
+    RewriteCond %{REQUEST_URI} !=/server-status
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteCond %{REQUEST_URI} !=/server-status
     RewriteRule ^ %1 [L,R=301]
 
     # Handle Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} !=/server-status
     RewriteRule ^ index.php [L]
 </IfModule>

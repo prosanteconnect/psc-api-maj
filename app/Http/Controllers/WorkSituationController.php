@@ -30,7 +30,7 @@ class WorkSituationController extends ApiController
     {
         $profession = $this->getExProOrFail($psId, $exProId);
         $situation = array_filter(request()->all());
-        $situation['situId'] = ($situation['roleCode'] ?? '').($situation['modeCode'] ?? '');
+        $situation['situId'] = $this->getSituationCompositeId($situation);
 
         $profession->workSituations()->create($situation);
         return $this->successResponse($this->printId($psId, $exProId, $situation['situId']),
