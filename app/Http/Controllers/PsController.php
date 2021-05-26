@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\AggregatePs;
 use App\Models\Ps;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Exception;
 
@@ -30,10 +32,20 @@ class PsController extends ApiController
      * Display a listing of the resource.
      *
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $psList = Ps::paginate(10);
         return $this->successResponse($this->psTransformer->transformCollection($psList->all()));
+    }
+
+    /**
+     * Aggregate Ps into extractRass.
+     *
+     */
+    public function aggregate(): JsonResponse
+    {
+        $this->dispatch(new AggregatePs());
+        return $this->successResponse(null, 'Aggregation initialized');
     }
 
     /**
@@ -74,8 +86,7 @@ class PsController extends ApiController
         $ps->update($psData['itself']);
 
         foreach ($psData['professions'] as $professionData) {
-            $professionData['exProId'] = ($professionData['code'] ?? '').($professionData['categoryCode'] ?? '');
-
+            $professionData['exProId'] = $this->getProfessionCompositeId($professionData);
             $profession = $ps->professions()->firstWhere('exProId', $professionData['exProId']);
             if (!$profession) {
                 $profession = $ps->professions()->create($professionData);
@@ -85,8 +96,7 @@ class PsController extends ApiController
 
             $expertises = $this->getNested($professionData, 'expertises')['expertises'];
             foreach ($expertises as $expertiseData) {
-                $expertiseData['expertiseId'] = ($expertiseData['code'] ?? '').($expertiseData['categoryCode'] ?? '');
-
+                $expertiseData['expertiseId'] = $this->getExpertiseCompositeId($expertiseData);
                 $expertise = $profession->expertises()->firstWhere('expertiseId', $expertiseData['expertiseId']);
                 if (!$expertise) {
                     $profession->expertises()->create($expertiseData);
@@ -97,8 +107,7 @@ class PsController extends ApiController
 
             $situations = $this->getNested($professionData, 'workSituations')['workSituations'];
             foreach ($situations as $situationData) {
-                $situationData['situId'] = ($situationData['roleCode'] ?? '').($situationData['modeCode'] ?? '');
-
+                $situationData['situId'] = $this->getSituationCompositeId($situationData);
                 $situation = $profession->workSituations()->firstWhere('situId', $situationData['situId']);
                 if (!$situation) {
                     $profession->workSituations()->create($situationData);
@@ -200,7 +209,7 @@ class PsController extends ApiController
         ];
     }
 
-    private function validatePs()
+    private function validatePs(): array
     {
         $validator = Validator::make(request()->all(), $this->rules, $this->customMessages);
 
@@ -212,18 +221,18 @@ class PsController extends ApiController
         $ps = $validator->validate();
 
         foreach ($ps['professions'] as &$profession) {
-            $profession['exProId'] = ($profession['code'] ?? '').($profession['categoryCode'] ?? '');
+            $profession['exProId'] = $this->getProfessionCompositeId($profession);
             foreach ($profession['expertises'] as &$expertise) {
-                $expertise['expertiseId'] = ($expertise['code'] ?? '').($expertise['categoryCode'] ?? '');
+                $expertise['expertiseId'] = $this->getExpertiseCompositeId($expertise);
             }
             foreach ($profession['workSituations'] as &$situation) {
-                $situation['situId'] = ($situation['roleCode'] ?? '').($situation['modeCode'] ?? '');
+                $situation['situId'] = $this->getSituationCompositeId($situation);
             }
         }
         return $ps;
     }
 
-    private function printId($psId)
+    private function printId($psId): array
     {
         return array('nationalId'=>urldecode($psId));
     }

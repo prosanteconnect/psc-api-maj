@@ -163,4 +163,28 @@ class ApiController extends BaseController
         }
         return $situation;
     }
+
+    protected function getProfessionCompositeId($profession): string {
+        $exProId = ($profession['code'] ?? '').($profession['categoryCode'] ?? '');
+        if ($exProId == '') {
+            return 'ND';
+        }
+        return $exProId;
+    }
+
+    protected function getExpertiseCompositeId($expertise): string {
+        $expertiseId = ($expertise['code'] ?? '').($expertise['categoryCode'] ?? '');
+        if ($expertiseId == '') {
+            return 'ND';
+        }
+        return $expertiseId;
+    }
+
+    protected function getSituationCompositeId($situation): string {
+        $situId = ($situation['roleCode'] ?? '').($situation['modeCode'] ?? '');
+        if ($situId == '') {
+            return 'ND';
+        }
+        return $situId;
+    }
 }
