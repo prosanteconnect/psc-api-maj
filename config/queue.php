@@ -36,7 +36,7 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'connection' => 'sqlite',
+            'connection' => 'queueDB',
             'table' => env('QUEUE_TABLE', 'jobs'),
             'queue' => 'default',
             'retry_after' => 90,

@@ -13,8 +13,8 @@ class CreateJobsTable extends Migration
      */
     public function up()
     {
-        if (Schema::connection('sqlite')->hasTable('jobs')) { return; }
-        Schema::connection('sqlite')->create('jobs', function (Blueprint $table) {
+        if (Schema::connection('queueDB')->hasTable('jobs')) { return; }
+        Schema::connection('queueDB')->create('jobs', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('queue')->index();
             $table->longText('payload');
