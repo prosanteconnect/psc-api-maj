@@ -13,6 +13,7 @@ class CreatePsTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('ps')) { return; }
         Schema::create('ps', function (Blueprint $collection) {
             $collection->string('nationalId')->unique();
             $collection->string('email')->nullable();

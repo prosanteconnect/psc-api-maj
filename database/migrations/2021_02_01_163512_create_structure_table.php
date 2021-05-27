@@ -13,6 +13,7 @@ class CreateStructureTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('structure')) { return; }
         Schema::create('structure', function (Blueprint $collection) {
             $collection->string('siteSIRET')->nullable();
             $collection->string('siteSIREN')->nullable();
