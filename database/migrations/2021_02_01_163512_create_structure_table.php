@@ -19,7 +19,7 @@ class CreateStructureTable extends Migration
             $collection->string('siteSIREN')->nullable();
             $collection->string('siteFINESS')->nullable();
             $collection->string('legalEstablishmentFINESS')->nullable();
-            $collection->string('structureTechnicalId')->unique();  // Id
+            $collection->string('structureTechnicalId')->unique()->index();  // Id
             $collection->string('legalCommercialName')->nullable();
             $collection->string('publicCommercialName')->nullable();
             $collection->string('recipientAdditionalInfo')->nullable();
