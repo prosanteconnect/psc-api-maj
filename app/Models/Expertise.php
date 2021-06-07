@@ -18,8 +18,8 @@ class Expertise extends Model {
 
     protected $fillable = [
         'expertiseId',
+        'typeCode',
         'code',
-        'categoryCode',
     ];
 
 }

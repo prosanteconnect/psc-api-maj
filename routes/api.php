@@ -49,6 +49,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
     $router->get('structures',  ['uses' => 'StructureController@index']);
     $router->post('structures',  ['uses' => 'StructureController@store']);
+    $router->put('structures',  ['uses' => 'StructureController@storeOrUpdate']);
     $router->get('structures/{structureId}', ['uses' => 'StructureController@show']);
     $router->put('structures/{structureId}', ['uses' => 'StructureController@update']);
     $router->delete('structures/{structureId}', ['uses' => 'StructureController@destroy']);

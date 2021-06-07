@@ -32,6 +32,6 @@ class CreateJobsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('sqlite')->dropIfExists('jobs');
+        Schema::connection('queueDB')->dropIfExists('jobs');
     }
 }
