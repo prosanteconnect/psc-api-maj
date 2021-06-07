@@ -6,7 +6,7 @@ namespace App\Models;
 
 
 use Jenssegers\Mongodb\Eloquent\Model;
-use Jenssegers\Mongodb\Relations\BelongsTo;
+use Jenssegers\Mongodb\Relations\EmbedsMany;
 
 /**
  * WorkSituation
@@ -23,15 +23,15 @@ class WorkSituation extends Model {
         'activitySectorCode',
         'pharmacistTableSectionCode',
         'roleCode',
-        'structure'
+        'structures'
     ];
 
     /**
-     * Get the Structure that this WorkSituation belongs to.
+     * Get the Structures for this WorkSituation.
      */
-    public function structure(): BelongsTo
+    public function structures(): EmbedsMany
     {
-        return $this->belongsTo(Structure::class);
+        return $this->embedsMany(StructureRef::class);
     }
 
 }

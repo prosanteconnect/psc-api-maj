@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+
 class WorkSituationController extends ApiController
 {
 
@@ -76,6 +78,7 @@ class WorkSituationController extends ApiController
      * @param $exProId
      * @param $situId
      * @return mixed
+     * @throws Exception
      */
     public function destroy($psId, $exProId, $situId)
     {
@@ -86,7 +89,7 @@ class WorkSituationController extends ApiController
             "Suppression de la situation d'exercise avec succès.");
     }
 
-    private function printId($psId, $exProId, $situId)
+    private function printId($psId, $exProId, $situId): array
     {
         return array('nationalId'=>urldecode($psId), 'exProId'=>$exProId, 'situId'=>$situId);
     }

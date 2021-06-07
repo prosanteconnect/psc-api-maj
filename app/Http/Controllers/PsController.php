@@ -25,7 +25,12 @@ class PsController extends ApiController
     public function __construct()
     {
         parent::__construct();
-        $this->rules = array_merge($this->psRules(), $this->exProRules(), $this->expertiseRules(), $this->situationRules());
+        $this->rules = array_merge($this->psRules(),
+            $this->exProRules(),
+            $this->expertiseRules(),
+            $this->situationRules(),
+            $this->structureRefRules()
+        );
     }
 
     /**
@@ -194,8 +199,8 @@ class PsController extends ApiController
     private function expertiseRules(): array
     {
         return [
+            'professions.*.expertises.*.typeCode' => 'nullable|string',
             'professions.*.expertises.*.code' => 'nullable|string',
-            'professions.*.expertises.*.categoryCode' => 'nullable|string',
         ];
     }
 
@@ -205,7 +210,15 @@ class PsController extends ApiController
             'professions.*.workSituations.*.modeCode' => 'nullable|string',
             'professions.*.workSituations.*.activitySectorCode' => 'nullable|string',
             'professions.*.workSituations.*.pharmacistTableSectionCode' => 'nullable|string',
-            'professions.*.workSituations.*.roleCode' => 'nullable|string'
+            'professions.*.workSituations.*.roleCode' => 'nullable|string',
+            'professions.*.workSituations.*.structures' => 'nullable|array'
+        ];
+    }
+
+    private function structureRefRules(): array
+    {
+        return [
+            'professions.*.workSituations.*.structures.*.structureId' => 'nullable|String'
         ];
     }
 

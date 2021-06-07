@@ -4,8 +4,11 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\Expertise;
+use App\Models\Profession;
 use App\Models\Ps;
 use App\Models\Structure;
+use App\Models\WorkSituation;
 use App\Psc\Transformers\ExpertiseTransformer;
 use App\Psc\Transformers\ProfessionTransformer;
 use App\Psc\Transformers\PsTransformer;
@@ -82,6 +85,23 @@ class ApiController extends BaseController
     }
 
     /**
+     * @param $structureId
+     * @return bool
+     */
+    protected function isNewStructure($structureId) : bool
+    {
+        $structure = Structure::find(urldecode($structureId));
+
+        if ($structure) {
+            $this->alreadyExistsResponse("Cette structure existe déjà.",
+                array('structureId'=>urldecode($structureId)))->send();
+            die();
+        }
+
+        return true;
+    }
+
+    /**
      * @param $psId
      * @return Ps
      */
@@ -118,7 +138,7 @@ class ApiController extends BaseController
      * @param $exProId
      * @return mixed
      */
-    protected function getExProOrFail($psId, $exProId)
+    protected function getExProOrFail($psId, $exProId) : Profession
     {
         $ps = $this->getPsOrFail($psId);
         $profession = $ps->professions()->firstWhere('exProId', $exProId);
@@ -136,7 +156,8 @@ class ApiController extends BaseController
      * @param $expertiseId
      * @return mixed
      */
-    protected function getExpertiseOrFail($psId, $exProId, $expertiseId) {
+    protected function getExpertiseOrFail($psId, $exProId, $expertiseId) : Expertise
+    {
         $profession = $this->getExProOrFail($psId, $exProId);
         $expertise = $profession->expertises()->firstWhere('expertiseId', $expertiseId);
         if (! $expertise) {
@@ -153,7 +174,8 @@ class ApiController extends BaseController
      * @param $situId
      * @return mixed
      */
-    protected function getSituationOrFail($psId, $exProId, $situId) {
+    protected function getSituationOrFail($psId, $exProId, $situId) : WorkSituation
+    {
         $profession = $this->getExProOrFail($psId, $exProId);
         $situation = $profession->workSituations()->firstWhere('situId', $situId);
         if (! $situation) {
@@ -164,24 +186,32 @@ class ApiController extends BaseController
         return $situation;
     }
 
-    protected function getProfessionCompositeId($profession): string {
-        $exProId = ($profession['code'] ?? '').($profession['categoryCode'] ?? '');
+    protected function getProfessionCompositeId($profession): string
+    {
+        $exProId = ($profession['code'] ?? '')
+            .($profession['categoryCode'] ?? '');
         if ($exProId == '') {
             return 'ND';
         }
         return $exProId;
     }
 
-    protected function getExpertiseCompositeId($expertise): string {
-        $expertiseId = ($expertise['code'] ?? '').($expertise['categoryCode'] ?? '');
+    protected function getExpertiseCompositeId($expertise): string
+    {
+        $expertiseId = ($expertise['typeCode'] ?? '')
+            .($expertise['code'] ?? '');
         if ($expertiseId == '') {
             return 'ND';
         }
         return $expertiseId;
     }
 
-    protected function getSituationCompositeId($situation): string {
-        $situId = ($situation['roleCode'] ?? '').($situation['modeCode'] ?? '');
+    protected function getSituationCompositeId($situation): string
+    {
+        $situId = ($situation['modeCode'] ?? '')
+            .($situation['activitySectorCode'] ?? '')
+            .($situation['pharmacistTableSectionCode'] ?? '')
+            .($situation['roleCode'] ?? '');
         if ($situId == '') {
             return 'ND';
         }

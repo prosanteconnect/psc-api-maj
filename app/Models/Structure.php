@@ -5,11 +5,12 @@ namespace App\Models;
 
 
 use Jenssegers\Mongodb\Eloquent\Model;
-use Jenssegers\Mongodb\Relations\HasMany;
 
 class Structure extends Model {
 
     protected $connection = 'mongodb';
+
+    protected $collection = 'structure';
 
     protected $primaryKey = 'structureTechnicalId';
 
@@ -42,11 +43,11 @@ class Structure extends Model {
     ];
 
     /**
-     * Get the WorkSituation for this Structure.
+     * Get the structure reference associated with the reference.
      */
-    public function workSituations(): HasMany
+    public function structureRef()
     {
-        return $this->hasMany(WorkSituation::class);
+        return $this->hasOne(StructureRef::class, 'structureId', 'structureTechnicalId');
     }
 
 }

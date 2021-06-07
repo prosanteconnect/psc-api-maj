@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Structure;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
 
 class StructureController extends ApiController
 {
@@ -12,7 +14,7 @@ class StructureController extends ApiController
      * Display a listing of the resource.
      *
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $structures = Structure::paginate(10);
         return $this->successResponse($this->structureTransformer->transformCollection($structures->all()));
@@ -25,10 +27,31 @@ class StructureController extends ApiController
      */
     public function store()
     {
-        $structure = array_filter(request()->all());
+        $structureId = request()->structureTechnicalId;
+        if ($this->isNewPs($structureId)) {
+            Structure::create($this->validateStructure());
+        }
+        return $this->successResponse($this->printId($structureId), 'Creation de la structure avec succès.');
+    }
 
-        Structure::create($structure);
-        return $this->successResponse($this->printId($structure['structureTechnicalId']), 'Creation avec succès');
+    public function storeOrUpdate(): JsonResponse
+    {
+        $structureId = request()->structureTechnicalId;
+        $validatedStructure = $this->validateStructure();
+        $structure = Structure::find(urldecode($structureId));
+
+        if(!$structure) {
+            try {
+                Structure::create($validatedStructure);
+                return $this->successResponse($this->printId($structureId), 'Creation de la structure avec succès.');
+            } catch (Exception $e) { // in case of concurrent create in DB
+                $structure = Structure::find(urldecode($structureId));
+            }
+        }
+
+        $structure->update($validatedStructure);
+
+        return $this->successResponse($this->printId($structureId), 'Mise à jour des données de la structure avec succès.');
     }
 
     /**
@@ -70,7 +93,55 @@ class StructureController extends ApiController
         return $this->successResponse($this->printId($structureId), 'Supression de la Structure avec succès.');
     }
 
-    private function printId($structureId)
+    private function structureRules(): array
+    {
+        return [
+            'siteSIRET' => 'nullable|string',
+            'siteSIREN' => 'nullable|string',
+            'siteFINESS' => 'nullable|string',
+            'legalEstablishmentFINESS' => 'nullable|string',
+            'structureTechnicalId' => 'nullable|string',
+            'legalCommercialName' => 'nullable|string', # raison sociale site
+            'publicCommercialName' => 'nullable|string', # enseigne commerciale site
+            'recipientAdditionalInfo' => 'nullable|string', # Complément destinataire
+            'geoLocationAdditionalInfo' => 'nullable|string', # Complément point géographique
+            'streetNumber' => 'nullable|string', # Numéro Voie
+            'streetNumberRepetitionIndex' => 'nullable|string', # Indice répétition voie
+            'streetCategoryCode' => 'nullable|string', # Code type de voie
+            'streetLabel' => 'nullable|string', # Libellé Voie
+            'distributionMention' => 'nullable|string', # Mention distribution
+            'cedexOffice' => 'nullable|string',
+            'postalCode' => 'nullable|string',
+            'communeCode' => 'nullable|string',
+            'countryCode' => 'nullable|string',
+            'phone' => 'nullable|string',
+            'phone2' => 'nullable|string',
+            'fax' => 'nullable|string',
+            'email' => 'nullable|string',
+            'departmentCode' => 'nullable|string',
+            'oldStructureId' => 'nullable|string',
+            'registrationAuthority' => 'nullable|string'
+        ];
+    }
+
+    private function validateStructure(): array
+    {
+        $customMessages = [
+            'required' => ':attribute est obligatoire.',
+            'unique' => ':attribute existe déjà.'
+        ];
+
+        $validator = Validator::make(request()->all(), $this->structureRules(), $customMessages);
+
+        if ($validator->fails()) {
+            $this->errorResponse($validator->errors()->first(), 500)->send();
+            die();
+        }
+
+        return $validator->validate();
+    }
+
+    private function printId($structureId): array
     {
         return array('structureId'=>urldecode($structureId));
     }

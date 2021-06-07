@@ -14,6 +14,8 @@ class Ps extends Model {
 
     protected $connection = 'mongodb';
 
+    protected $collection = 'ps';
+
     protected $primaryKey = 'nationalId';
 
     protected $fillable = [

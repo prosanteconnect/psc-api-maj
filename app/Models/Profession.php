@@ -23,7 +23,9 @@ class Profession extends Model {
         'categoryCode',
         'salutationCode',
         'lastName',
-        'firstName'
+        'firstName',
+        'expertises',
+        'workSituations'
     ];
 
     /**
