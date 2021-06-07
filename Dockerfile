@@ -76,7 +76,8 @@ RUN composer install --optimize-autoloader --no-dev
 RUN composer dump-autoload
 
 # Configure Supervisor
-RUN echo $'[program:default]\n\
+RUN echo -e "\
+[program:default]\n\
 process_name=%(program_name)s\n\
 command=php /var/www/html/artisan queue:work --sleep=3 --tries=3\n\
 autostart=true\n\
@@ -84,12 +85,12 @@ autorestart=true\n\
 numprocs=1\n\
 redirect_stderr=true\n\
 logfile=/dev/stdout\n\
-stopwaitsecs=3600'\
->> /etc/supervisor/conf.d/default.conf
+stopwaitsecs=3600\
+" > /etc/supervisor/conf.d/default.conf
 
 RUN sed -i '/^exec.*/i mv \/secrets\/.env \/var\/www\/html\/.env' /usr/local/bin/apache2-foreground
 
 # DANGER ZONE: DB migration on startup
 RUN sed -i '/^exec.*/i php artisan migrate --force' /usr/local/bin/apache2-foreground
 
-RUN sed -i '/^exec.*/i supervisorctl reread && supervisorctl update && supervisorctl start all' /usr/local/bin/apache2-foreground
+RUN sed -i '/^exec.*/i service supervisor start' /usr/local/bin/apache2-foreground
