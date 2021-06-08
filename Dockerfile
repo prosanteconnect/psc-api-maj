@@ -76,15 +76,15 @@ RUN composer install --optimize-autoloader --no-dev
 RUN composer dump-autoload
 
 # Configure Supervisor
-RUN echo -e "\
-[program:default]\n\
-process_name=%(program_name)s\n\
-command=php /var/www/html/artisan queue:work --sleep=3 --tries=3\n\
-autostart=true\n\
-autorestart=true\n\
-numprocs=1\n\
-redirect_stderr=true\n\
-logfile=/dev/stdout\n\
+RUN echo "\
+[program:default]\
+process_name=%(program_name)s\
+command=php /var/www/html/artisan queue:work --sleep=3 --tries=3\
+autostart=true\
+autorestart=true\
+numprocs=1\
+redirect_stderr=true\
+logfile=/dev/stdout\
 stopwaitsecs=3600\
 " > /etc/supervisor/conf.d/default.conf
 
