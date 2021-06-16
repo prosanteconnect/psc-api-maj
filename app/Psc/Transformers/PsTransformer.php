@@ -4,13 +4,15 @@
 namespace App\Psc\Transformers;
 
 
+use JetBrains\PhpStorm\Pure;
+
 /**
  * Class PsTransformer
  * @package App\Psc\Transformers
  */
 class PsTransformer extends Transformer {
 
-    protected $professionTransformer;
+    protected ProfessionTransformer $professionTransformer;
 
     /**
      * Create a new controller instance.
@@ -25,11 +27,13 @@ class PsTransformer extends Transformer {
      * transform Ps into a protected Ps.
      *
      * @param $ps
+     * @param null $refId
      * @return mixed
      */
-    public function transform($ps)
+    public function transform($ps, $refId=null): mixed
     {
         $protectedPs = $ps->toArray();
+        $protectedPs['nationalId'] = $refId ?? $ps['nationalId'];
         $protectedPs['phone'] = $this->hidePhone(isset($ps['phone']) ? $ps['phone'] : "");
         $protectedPs['email'] = $this->hideEmail(isset($ps['email']) ? $ps['email'] : "");
         if (isset($ps['professions'])) {
@@ -62,6 +66,7 @@ class PsTransformer extends Transformer {
      * @param $number
      * @return string
      */
+    #[Pure]
     private function hidePhone($number): string
     {
         if($number && $number[0]=='+'){

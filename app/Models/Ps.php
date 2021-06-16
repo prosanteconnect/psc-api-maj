@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Jenssegers\Mongodb\Eloquent\Model;
 use Jenssegers\Mongodb\Relations\EmbedsMany;
+use Jenssegers\Mongodb\Relations\HasMany;
 
 /**
  * Ps
@@ -34,6 +35,14 @@ class Ps extends Model {
         'salutationCode',
         'professions'
         ];
+
+    /**
+     * Get the reference ps for nationalId.
+     */
+    public function psRef(): HasMany
+    {
+        return $this->hasMany(PsRef::class, "nationalId", "nationalId");
+    }
 
     /**
      * Get the professions for this Ps.

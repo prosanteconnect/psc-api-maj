@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
+
 class ProfessionController extends ApiController
 {
 
@@ -11,7 +13,7 @@ class ProfessionController extends ApiController
      * @param $psId
      * @return mixed
      */
-    public function index($psId)
+    public function index($psId): JsonResponse
     {
         $ps = $this->getPsOrFail($psId);
         return $this->successResponse($this->professionTransformer->transformCollection($ps->professions()->toArray()));
@@ -21,9 +23,9 @@ class ProfessionController extends ApiController
      * Store a newly created resource in storage.
      *
      * @param $psId
-     * @return mixed
+     * @return JsonResponse
      */
-    public function store($psId)
+    public function store($psId): JsonResponse
     {
         $ps = $this->getPsOrFail($psId);
         $profession = array_filter(request()->all());
@@ -38,9 +40,9 @@ class ProfessionController extends ApiController
      *
      * @param $psId
      * @param $exProId
-     * @return mixed
+     * @return JsonResponse
      */
-    public function show($psId, $exProId)
+    public function show($psId, $exProId): JsonResponse
     {
         $profession = $this->getExProOrFail($psId, $exProId);
         return $this->successResponse($this->professionTransformer->transform($profession->toArray()));
@@ -51,9 +53,9 @@ class ProfessionController extends ApiController
      *
      * @param $psId
      * @param $exProId
-     * @return mixed
+     * @return JsonResponse
      */
-    public function update($psId, $exProId)
+    public function update($psId, $exProId): JsonResponse
     {
         $profession = $this->getExProOrFail($psId, $exProId);
         $updatedProfession = array_filter(request()->all());
@@ -67,9 +69,9 @@ class ProfessionController extends ApiController
      *
      * @param $psId
      * @param $exProId
-     * @return mixed
+     * @return JsonResponse
      */
-    public function destroy($psId, $exProId)
+    public function destroy($psId, $exProId): JsonResponse
     {
         $profession = $this->getExProOrFail($psId, $exProId);
         $profession->delete();

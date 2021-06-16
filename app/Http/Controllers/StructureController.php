@@ -6,6 +6,8 @@ use App\Models\Structure;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use JetBrains\PhpStorm\ArrayShape;
 
 class StructureController extends ApiController
 {
@@ -16,7 +18,7 @@ class StructureController extends ApiController
      */
     public function index(): JsonResponse
     {
-        $structures = Structure::paginate(10);
+        $structures = Structure::query()->paginate(10);
         return $this->successResponse($this->structureTransformer->transformCollection($structures->all()));
     }
 
@@ -25,11 +27,14 @@ class StructureController extends ApiController
      *
      * @return mixed
      */
-    public function store()
+    public function store(): mixed
     {
         $structureId = request()->structureTechnicalId;
-        if ($this->isNewPs($structureId)) {
-            Structure::create($this->validateStructure());
+        if ($this->isNewStructure($structureId)) {
+            Structure::query()->create($this->validateStructure());
+        } else {
+            return $this->alreadyExistsResponse("Cette structure existe déjà.",
+                array('structureId' => urldecode($structureId)));
         }
         return $this->successResponse($this->printId($structureId), 'Creation de la structure avec succès.');
     }
@@ -38,14 +43,14 @@ class StructureController extends ApiController
     {
         $structureId = request()->structureTechnicalId;
         $validatedStructure = $this->validateStructure();
-        $structure = Structure::find(urldecode($structureId));
+        $structure = Structure::query()->find(urldecode($structureId));
 
         if(!$structure) {
             try {
-                Structure::create($validatedStructure);
+                Structure::query()->create($validatedStructure);
                 return $this->successResponse($this->printId($structureId), 'Creation de la structure avec succès.');
-            } catch (Exception $e) { // in case of concurrent create in DB
-                $structure = Structure::find(urldecode($structureId));
+            } catch (Exception) { // in case of concurrent create in DB
+                $structure = Structure::query()->find(urldecode($structureId));
             }
         }
 
@@ -58,9 +63,9 @@ class StructureController extends ApiController
      * Display the specified resource.
      *
      * @param $structureId
-     * @return mixed
+     * @return JsonResponse
      */
-    public function show($structureId)
+    public function show($structureId): JsonResponse
     {
         $structure = $this->getStructureOrFail($structureId);
         return $this->successResponse($this->structureTransformer->transform($structure));
@@ -70,9 +75,9 @@ class StructureController extends ApiController
      * Update the specified resource in storage.
      *
      * @param $structureId
-     * @return mixed
+     * @return JsonResponse
      */
-    public function update($structureId)
+    public function update($structureId): JsonResponse
     {
         $structure = $this->getStructureOrFail($structureId);
         $structure->update(array_filter(request()->all()));
@@ -83,10 +88,10 @@ class StructureController extends ApiController
      * Remove the specified resource from storage.
      *
      * @param $structureId
-     * @return mixed
+     * @return JsonResponse
      * @throws Exception
      */
-    public function destroy($structureId)
+    public function destroy($structureId): JsonResponse
     {
         $structure = $this->getStructureOrFail($structureId);
         $structure->delete();
@@ -100,7 +105,7 @@ class StructureController extends ApiController
             'siteSIREN' => 'nullable|string',
             'siteFINESS' => 'nullable|string',
             'legalEstablishmentFINESS' => 'nullable|string',
-            'structureTechnicalId' => 'nullable|string',
+            'structureTechnicalId' => 'required',
             'legalCommercialName' => 'nullable|string', # raison sociale site
             'publicCommercialName' => 'nullable|string', # enseigne commerciale site
             'recipientAdditionalInfo' => 'nullable|string', # Complément destinataire
@@ -127,7 +132,7 @@ class StructureController extends ApiController
     private function validateStructure(): array
     {
         $customMessages = [
-            'required' => ':attribute est obligatoire.',
+            'required' => "l'attribut :attribute est obligatoire.",
             'unique' => ':attribute existe déjà.'
         ];
 
@@ -138,9 +143,15 @@ class StructureController extends ApiController
             die();
         }
 
-        return $validator->validate();
+        try {
+            return $validator->validate();
+        } catch (ValidationException $e) {
+            $this->errorResponse($e->getMessage(), 500)->send();
+            die();
+        }
     }
 
+    #[ArrayShape(['structureId' => "string"])]
     private function printId($structureId): array
     {
         return array('structureId'=>urldecode($structureId));
