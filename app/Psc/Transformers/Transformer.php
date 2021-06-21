@@ -25,8 +25,9 @@ abstract class Transformer {
      * transform a single item.
      *
      * @param $item
+     * @param null $id
      * @return mixed
      */
-    public abstract function transform($item);
+    public abstract function transform($item, $id=null): mixed;
 
 }

@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Expertise;
 use App\Models\Profession;
 use App\Models\Ps;
+use App\Models\PsRef;
 use App\Models\Structure;
 use App\Models\WorkSituation;
 use App\Psc\Transformers\ExpertiseTransformer;
@@ -14,7 +15,10 @@ use App\Psc\Transformers\ProfessionTransformer;
 use App\Psc\Transformers\PsTransformer;
 use App\Psc\Transformers\StructureTransformer;
 use App\Psc\Transformers\WorkSituationTransformer;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use JetBrains\PhpStorm\ArrayShape;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
 /**
@@ -28,24 +32,24 @@ class ApiController extends BaseController
     /**
      * @var PsTransformer
      */
-    protected $psTransformer;
+    protected PsTransformer $psTransformer;
     /**
      * @var ProfessionTransformer
      */
-    protected $professionTransformer;
+    protected ProfessionTransformer $professionTransformer;
     /**
      * @var ExpertiseTransformer
      */
-    protected $expertiseTransformer;
+    protected ExpertiseTransformer $expertiseTransformer;
     /**
      * @var WorkSituationTransformer
      */
-    protected $situationTransformer;
+    protected WorkSituationTransformer $situationTransformer;
 
     /**
      * @var StructureTransformer
      */
-    protected $structureTransformer;
+    protected StructureTransformer $structureTransformer;
 
     /**
      * Create a new controller instance.
@@ -60,6 +64,11 @@ class ApiController extends BaseController
         $this->structureTransformer = new StructureTransformer();
     }
 
+    /**
+     * @param array $parent
+     * @param String $child
+     * @return array
+     */
     protected function getNested(array $parent, String $child): array
     {
         $nested = isset($parent[$child]) ? $parent[$child] : null;
@@ -68,19 +77,31 @@ class ApiController extends BaseController
     }
 
     /**
-     * @param $psId
+     * @param $id
      * @return bool
      */
-    protected function isNewPs($psId) : bool
+    protected function isNewPs($id) : bool
     {
-        $ps = Ps::find(urldecode($psId));
-
-        if ($ps) {
-            $this->alreadyExistsResponse("Ce professionel existe déjà.",
-                array('nationalId'=>urldecode($psId)))->send();
-            die();
+        $psRefId = urldecode($id);
+        $psRef = PsRef::query()->find($psRefId);
+        if ($psRef) {
+            $psId = $psRef['nationalId'];
+            $ps = Ps::query()->find($psId);
+            // there's reference to a Ps
+            if ($ps) return false;
+            // there's reference to nowhere. Delete link. Return true
+            Log::info('There is reference to '.$psId.' but Ps does not exist. deleting link');
+            $psRef->delete();
+        } else {
+            $ps = Ps::query()->find($psRefId);
+            if ($ps) {
+                // no reference but Ps exists. Create link
+                Log::info('No reference to '.$psRefId.' but Ps exists. Creating link');
+                PsRef::query()->create($this->psLink($psRefId));
+                return false;
+            }
+            // no reference, no Ps. Return true
         }
-
         return true;
     }
 
@@ -90,14 +111,8 @@ class ApiController extends BaseController
      */
     protected function isNewStructure($structureId) : bool
     {
-        $structure = Structure::find(urldecode($structureId));
-
-        if ($structure) {
-            $this->alreadyExistsResponse("Cette structure existe déjà.",
-                array('structureId'=>urldecode($structureId)))->send();
-            die();
-        }
-
+        $structure = Structure::query()->find(urldecode($structureId));
+        if ($structure) false;
         return true;
     }
 
@@ -105,13 +120,14 @@ class ApiController extends BaseController
      * @param $psId
      * @return Ps
      */
-    protected function getPsOrFail($psId) : Ps
+    protected function getPsOrFail($psId): Ps
     {
         try {
-            $ps = Ps::findOrFail(urldecode($psId));
-        } catch(ModelNotFoundException $e) {
+            $psRef = PsRef::query()->findOrFail(urldecode($psId));
+            $ps = Ps::query()->findOrFail($psRef['nationalId']);
+        } catch(ModelNotFoundException) {
             $this->notFoundResponse("Ce professionel n'exist pas.",
-                array('nationalId'=>urldecode($psId)))->send();
+                array('nationalId' => urldecode($psId)))->send();
             die();
         }
         return $ps;
@@ -124,10 +140,10 @@ class ApiController extends BaseController
     protected function getStructureOrFail($structureId) : Structure
     {
         try {
-            $structure = Structure::findOrFail($structureId);
-        } catch(ModelNotFoundException $e) {
+            $structure = Structure::query()->findOrFail($structureId);
+        } catch(ModelNotFoundException) {
             $this->notFoundResponse("Cette structure n'existe pas.",
-                array('structureId'=>$structureId))->send();
+                array('structureId' => $structureId))->send();
             die();
         }
         return $structure;
@@ -144,7 +160,7 @@ class ApiController extends BaseController
         $profession = $ps->professions()->firstWhere('exProId', $exProId);
         if (! $profession) {
             $this->notFoundResponse("Cet exercice professionnel n'exist pas.",
-                array('nationalId'=>urldecode($psId), 'exProId'=>$exProId))->send();
+                array('nationalId' => urldecode($psId), 'exProId' => $exProId))->send();
             die();
         }
         return $profession;
@@ -162,7 +178,7 @@ class ApiController extends BaseController
         $expertise = $profession->expertises()->firstWhere('expertiseId', $expertiseId);
         if (! $expertise) {
             $this->notFoundResponse("Ce savoir fair n'exist pas.",
-                array('nationalId'=>urldecode($psId), 'exProId'=>$exProId, 'expertiseId'=>$expertiseId))->send();
+                array('nationalId' => urldecode($psId), 'exProId' => $exProId, 'expertiseId' => $expertiseId))->send();
             die();
         }
         return $expertise;
@@ -180,10 +196,25 @@ class ApiController extends BaseController
         $situation = $profession->workSituations()->firstWhere('situId', $situId);
         if (! $situation) {
             $this->notFoundResponse("Cette situation d'exercise n'exist pas.",
-                array('nationalId'=>urldecode($psId), 'exProId'=>$exProId, 'situId'=>$situId))->send();
+                array('nationalId' => urldecode($psId), 'exProId' => $exProId, 'situId' => $situId))->send();
             die();
         }
         return $situation;
+    }
+
+    #[ArrayShape(['nationalIdRef' => "string", 'nationalId' => "string", 'activated' => "float|int|string"])]
+    protected function psLink($psId): array
+    {
+        return [
+            'nationalIdRef' => urldecode($psId),
+            'nationalId' => urldecode($psId),
+            'activated' => Carbon::now()->timestamp
+        ];
+    }
+
+    protected function isActive($psRef): bool
+    {
+        return ($psRef->activated - $psRef->deactivated) >= 0;
     }
 
     protected function getProfessionCompositeId($profession): string
@@ -216,5 +247,27 @@ class ApiController extends BaseController
             return 'ND';
         }
         return $situId;
+    }
+
+    protected function savePs($psId, $validPs): bool
+    {
+        if ($this->isNewPs($psId)) {
+            // Entry is new. Create Ps and Link
+            Ps::query()->create($validPs);
+            PsRef::query()->create($this->psLink($psId));
+        } else {
+            $psRef = PsRef::query()->findOrFail(urldecode($psId));
+            if ($this->isActive($psRef)) {
+                // Ps is still active. Return error.
+                return false;
+            } else {
+                // Ps was deactivated. Change link to active and update Ps data.
+                $psRef->update(['activated' => Carbon::now()->timestamp]);
+                $ps = Ps::query()->findOrFail($psRef['nationalId']);
+                $updatedPs = array_replace($validPs, ['nationalId' => $psRef['nationalId']]);
+                $ps->update($updatedPs);
+            }
+        }
+        return true;
     }
 }

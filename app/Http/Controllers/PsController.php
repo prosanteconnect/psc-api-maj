@@ -2,19 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\AggregatePs;
+use App\Jobs\AggregatePsJob;
 use App\Models\Ps;
 
+use App\Models\PsRef;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Exception;
+use Illuminate\Validation\ValidationException;
+use JetBrains\PhpStorm\ArrayShape;
 
 class PsController extends ApiController
 {
 
-    private $rules;
-    private $customMessages = [
-        'required' => ':attribute est obligatoire.',
+    /**
+     * @var array
+     */
+    private array $rules;
+    private array $customMessages = [
+        'required' => "l'attribut :attribute est obligatoire.",
         'unique' => ':attribute existe déjà.'
     ];
 
@@ -39,7 +46,7 @@ class PsController extends ApiController
      */
     public function index(): JsonResponse
     {
-        $psList = Ps::paginate(10);
+        $psList = Ps::query()->paginate(10);
         return $this->successResponse($this->psTransformer->transformCollection($psList->all()));
     }
 
@@ -49,7 +56,7 @@ class PsController extends ApiController
      */
     public function aggregate(): JsonResponse
     {
-        $this->dispatch(new AggregatePs());
+        $this->dispatch(new AggregatePsJob());
         return $this->successResponse(null, 'Aggregation initialized');
     }
 
@@ -58,39 +65,55 @@ class PsController extends ApiController
      *
      * @return mixed
      */
-    public function store()
+    public function store(): mixed
     {
         $psId = request()->nationalId;
-        if ($this->isNewPs($psId)) {
-            Ps::create($this->validatePs());
+        $validatedPs = $this->validatePs();
+        if ($this->savePs($psId, $validatedPs)) {
+            return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès');
+        } else {
+            return $this->alreadyExistsResponse("Ce professionel existe déjà.",
+                array('nationalId' => urldecode($psId)));
         }
-        return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès');
     }
 
     /**
      * Store or Update the specified resource in storage.
      *
-     * @return mixed
+     * @return JsonResponse
      */
-    public function storeOrUpdate()
+    public function storeOrUpdate(): JsonResponse
     {
         $psId = request()->nationalId;
-        $validatedPs = $this->validatePs();
-        $ps = Ps::find(urldecode($psId));
-
-        if(!$ps) {
-            try {
-                Ps::create($validatedPs);
+        $validPs = $this->validatePs();
+        try {
+            if ($this->savePs($psId, $validPs)) {
                 return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès');
-            } catch (Exception $e) { // in case of concurrent create in DB
-                $ps = Ps::find(urldecode($psId));
+            } else {
+                $psRef = PsRef::query()->find(urldecode($psId));
+                $ps = Ps::query()->find($psRef['nationalId']);
             }
+        } catch (Exception) { // in case of concurrent create in DB
+            $psRef = PsRef::query()->find(urldecode($psId));
+            $ps = Ps::query()->find($psRef['nationalId']);
         }
 
-        $psData = $this->getNested($validatedPs, 'professions');
+        $validPs['nationalId'] = $psRef['nationalId'];
+        $psData = $this->getNested($validPs, 'professions');
         $ps->update($psData['itself']);
+        $this->updateNested($ps, $psData['professions']);
 
-        foreach ($psData['professions'] as $professionData) {
+        return $this->successResponse($this->printId($psId), 'Mise à jour du Ps avec succès.');
+    }
+
+    /**
+     * @param $ps
+     * @param $professions
+     */
+    protected function updateNested($ps, $professions): void
+    {
+        if (!isset($professions)) return;
+        foreach ($professions as $professionData) {
             $professionData['exProId'] = $this->getProfessionCompositeId($professionData);
             $profession = $ps->professions()->firstWhere('exProId', $professionData['exProId']);
             if (!$profession) {
@@ -100,52 +123,71 @@ class PsController extends ApiController
             }
 
             $expertises = $this->getNested($professionData, 'expertises')['expertises'];
-            foreach ($expertises as $expertiseData) {
-                $expertiseData['expertiseId'] = $this->getExpertiseCompositeId($expertiseData);
-                $expertise = $profession->expertises()->firstWhere('expertiseId', $expertiseData['expertiseId']);
-                if (!$expertise) {
-                    $profession->expertises()->create($expertiseData);
-                } else {
-                    $expertise->update($expertiseData);
-                }
-            }
+            $this->updateNestedExpertise($expertises, $profession);
 
             $situations = $this->getNested($professionData, 'workSituations')['workSituations'];
-            foreach ($situations as $situationData) {
-                $situationData['situId'] = $this->getSituationCompositeId($situationData);
-                $situation = $profession->workSituations()->firstWhere('situId', $situationData['situId']);
-                if (!$situation) {
-                    $profession->workSituations()->create($situationData);
-                } else {
-                    $situation->update($situationData);
-                }
+            $this->updateNestedSituation($situations, $profession);
+        }
+    }
+
+    /**
+     * @param mixed $expertises
+     * @param $profession
+     */
+    protected function updateNestedExpertise(mixed $expertises, $profession): void
+    {
+        if (!isset($expertises)) return;
+        foreach ($expertises as $expertiseData) {
+            $expertiseData['expertiseId'] = $this->getExpertiseCompositeId($expertiseData);
+            $expertise = $profession->expertises()->firstWhere('expertiseId', $expertiseData['expertiseId']);
+            if (!$expertise) {
+                $profession->expertises()->create($expertiseData);
+            } else {
+                $expertise->update($expertiseData);
             }
         }
-        return $this->successResponse($this->printId($psId), 'Mise à jour du Ps avec succès.');
+    }
+
+    /**
+     * @param mixed $situations
+     * @param $profession
+     */
+    protected function updateNestedSituation(mixed $situations, $profession): void
+    {
+        if (!isset($situations)) return;
+        foreach ($situations as $situationData) {
+            $situationData['situId'] = $this->getSituationCompositeId($situationData);
+            $situation = $profession->workSituations()->firstWhere('situId', $situationData['situId']);
+            if (!$situation) {
+                $profession->workSituations()->create($situationData);
+            } else {
+                $situation->update($situationData);
+            }
+        }
     }
 
     /**
      * Display the specified resource.
      *
      * @param $psId
-     * @return mixed
+     * @return JsonResponse
      */
-    public function show($psId)
+    public function show($psId): JsonResponse
     {
         $ps = $this->getPsOrFail($psId);
-        return $this->successResponse($this->psTransformer->transform($ps));
+        return $this->successResponse($this->psTransformer->transform($ps, urldecode($psId)));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param $psId
-     * @return mixed
+     * @return JsonResponse
      */
-    public function update($psId)
+    public function update($psId): JsonResponse
     {
         $ps = $this->getPsOrFail($psId);
-        $ps->update(array_filter(request()->all()));
+        $ps->update($this->validatePs($ps["nationalId"]));
         return $this->successResponse($this->printId($psId), 'Mise à jour du Ps avec succès.');
     }
 
@@ -153,13 +195,13 @@ class PsController extends ApiController
      * Remove the specified resource from storage.
      *
      * @param $psId
-     * @return mixed
+     * @return JsonResponse
      * @throws Exception
      */
-    public function destroy($psId)
+    public function destroy($psId): JsonResponse
     {
-        $ps = $this->getPsOrFail($psId);
-        $ps->delete();
+        $psRef = PsRef::query()->findOrFail(urldecode($psId));
+        $psRef->update(['deactivated' => Carbon::now()->timestamp]);
         return $this->successResponse($this->printId($psId), 'Supression du Ps avec succès.');
     }
 
@@ -183,6 +225,9 @@ class PsController extends ApiController
         ];
     }
 
+    /**
+     * @return string[]
+     */
     private function exProRules(): array
     {
         return [
@@ -222,32 +267,51 @@ class PsController extends ApiController
         ];
     }
 
-    private function validatePs(): array
+    protected function validatePs($nationalId = null): array
     {
-        $validator = Validator::make(request()->all(), $this->rules, $this->customMessages);
+        $psData = request()->all();
+        $psData['nationalId'] = $nationalId ?? $psData['nationalId'];
+        $validator = Validator::make($psData, $this->rules, $this->customMessages);
 
         if ($validator->fails()) {
             $this->errorResponse($validator->errors()->first(), 500)->send();
             die();
         }
 
-        $ps = $validator->validate();
-
-        foreach ($ps['professions'] as &$profession) {
-            $profession['exProId'] = $this->getProfessionCompositeId($profession);
-            foreach ($profession['expertises'] as &$expertise) {
-                $expertise['expertiseId'] = $this->getExpertiseCompositeId($expertise);
-            }
-            foreach ($profession['workSituations'] as &$situation) {
-                $situation['situId'] = $this->getSituationCompositeId($situation);
-            }
+        try {
+            $ps = $this->injectCompositeIds($validator->validate());
+        } catch (ValidationException $e) {
+            $this->errorResponse($e->getMessage(), 500)->send();
+            die();
         }
+
         return $ps;
     }
 
+    #[ArrayShape(['nationalId' => "string"])]
     private function printId($psId): array
     {
         return array('nationalId'=>urldecode($psId));
+    }
+
+    /**
+     * @param $ps
+     * @return array
+     */
+    protected function injectCompositeIds($ps): array
+    {
+        if (isset($ps['professions'])) {
+            foreach ($ps['professions'] as &$profession) {
+                $profession['exProId'] = $this->getProfessionCompositeId($profession);
+                if (isset($profession['expertises']))
+                    foreach ($profession['expertises'] as &$expertise)
+                        $expertise['expertiseId'] = $this->getExpertiseCompositeId($expertise);
+                if (isset($profession['workSituations']))
+                    foreach ($profession['workSituations'] as &$situation)
+                        $situation['situId'] = $this->getSituationCompositeId($situation);
+            }
+        }
+        return $ps;
     }
 
 }

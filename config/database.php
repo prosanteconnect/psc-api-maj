@@ -49,8 +49,8 @@ return  [
 
         'queueDB' => [
             'driver'   => 'sqlite',
-            'database' => env('DB_DATABASE', storage_path('jobs.sqlite')),
-            'prefix'   => env('DB_PREFIX', ''),
+            'database' => env('DB_QUEUE_DATABASE', storage_path('jobs.sqlite')),
+            'prefix'   => env('DB_QUEUE_PREFIX', ''),
         ],
     ],
 

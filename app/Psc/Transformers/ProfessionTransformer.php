@@ -27,9 +27,10 @@ class ProfessionTransformer extends Transformer {
      * transform Profession into a protected Profession.
      *
      * @param $profession
+     * @param null $id
      * @return mixed
      */
-    public function transform($profession)
+    public function transform($profession, $id=null): mixed
     {
         $protectedProfession = $profession;
         if (isset($profession['expertises'])) {

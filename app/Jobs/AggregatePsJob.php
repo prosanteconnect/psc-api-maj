@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Ps;
 
-class AggregatePs extends Job
+class AggregatePsJob extends Job
 {
     /**
      * Create a new job instance.
@@ -23,7 +23,7 @@ class AggregatePs extends Job
      */
     public function handle()
     {
-        Ps::raw(function($collection)
+        Ps::query()->raw(function($collection)
         {
             return $collection->aggregate([
                 ['$unwind' => '$professions'],
