@@ -80,7 +80,7 @@ class StructureController extends ApiController
     public function update($structureId): JsonResponse
     {
         $structure = $this->getStructureOrFail($structureId);
-        $structure->update(array_filter(request()->all()));
+        $structure->update($this->validateStructure());
         return $this->successResponse($this->printId($structureId), 'Mise à jour de la Structure avec succès.');
     }
 
