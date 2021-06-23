@@ -98,57 +98,10 @@ class StructureController extends ApiController
         return $this->successResponse($this->printId($structureId), 'Supression de la Structure avec succès.');
     }
 
-    private function structureRules(): array
-    {
-        return [
-            'siteSIRET' => 'nullable|string',
-            'siteSIREN' => 'nullable|string',
-            'siteFINESS' => 'nullable|string',
-            'legalEstablishmentFINESS' => 'nullable|string',
-            'structureTechnicalId' => 'required',
-            'legalCommercialName' => 'nullable|string', # raison sociale site
-            'publicCommercialName' => 'nullable|string', # enseigne commerciale site
-            'recipientAdditionalInfo' => 'nullable|string', # Complément destinataire
-            'geoLocationAdditionalInfo' => 'nullable|string', # Complément point géographique
-            'streetNumber' => 'nullable|string', # Numéro Voie
-            'streetNumberRepetitionIndex' => 'nullable|string', # Indice répétition voie
-            'streetCategoryCode' => 'nullable|string', # Code type de voie
-            'streetLabel' => 'nullable|string', # Libellé Voie
-            'distributionMention' => 'nullable|string', # Mention distribution
-            'cedexOffice' => 'nullable|string',
-            'postalCode' => 'nullable|string',
-            'communeCode' => 'nullable|string',
-            'countryCode' => 'nullable|string',
-            'phone' => 'nullable|string',
-            'phone2' => 'nullable|string',
-            'fax' => 'nullable|string',
-            'email' => 'nullable|string',
-            'departmentCode' => 'nullable|string',
-            'oldStructureId' => 'nullable|string',
-            'registrationAuthority' => 'nullable|string'
-        ];
-    }
-
     private function validateStructure(): array
     {
-        $customMessages = [
-            'required' => "l'attribut :attribute est obligatoire.",
-            'unique' => ':attribute existe déjà.'
-        ];
-
-        $validator = Validator::make(request()->all(), $this->structureRules(), $customMessages);
-
-        if ($validator->fails()) {
-            $this->errorResponse($validator->errors()->first(), 500)->send();
-            die();
-        }
-
-        try {
-            return $validator->validate();
-        } catch (ValidationException $e) {
-            $this->errorResponse($e->getMessage(), 500)->send();
-            die();
-        }
+        $validator = Validator::make(request()->all(), $this->structureRules(), $this->getCustomMessages());
+        return $validator->validate();
     }
 
     #[ArrayShape(['structureId' => "string"])]

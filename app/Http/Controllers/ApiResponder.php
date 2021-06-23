@@ -12,27 +12,30 @@ trait ApiResponder
     /**
      * @param string $message
      * @param null $data
-     * @return mixed
+     * @return JsonResponse
      */
-    public function notFoundResponse($message = 'Not found!', $data = null){
+    public function notFoundResponse($message = 'Not found!', $data = null): JsonResponse
+    {
         return $this->errorResponse($message, 404, $data);
     }
 
     /**
      * @param string $message
      * @param null $data
-     * @return mixed
+     * @return JsonResponse
      */
-    public function alreadyExistsResponse($message = 'Already exists!', $data = null){
+    public function alreadyExistsResponse($message = 'Already exists!', $data = null): JsonResponse
+    {
         return $this->errorResponse($message, 409, $data);
     }
 
     /**
      * @param string $message
      * @param null $data
-     * @return mixed
+     * @return JsonResponse
      */
-    public function internalErrorResponse($message = 'Internal Error!', $data = null){
+    public function internalErrorResponse($message = 'Internal Error!', $data = null): JsonResponse
+    {
         return $this->errorResponse($message, 500, $data);
     }
 

@@ -51,8 +51,12 @@ class Handler extends ExceptionHandler
      *
      * @throws Throwable
      */
-    public function render($request, Throwable $e)
+    public function render($request, Throwable $e): Response|JsonResponse
     {
+        if($e instanceof ValidationException) {
+            return $this->errorResponse($e->validator->errors()->first(), 500);
+        }
+
         $rendered = parent::render($request, $e);
 
         return response()->json([
@@ -62,5 +66,14 @@ class Handler extends ExceptionHandler
             'message' => $e->getMessage(),
             'code' => $rendered->getStatusCode()
         ], $rendered->getStatusCode());
+    }
+
+    private function errorResponse($message, $code, $data = null): JsonResponse
+    {
+        return response()->json([
+            'status'=>'Error',
+            'message' => $message,
+            'data' => $data
+        ], $code);
     }
 }

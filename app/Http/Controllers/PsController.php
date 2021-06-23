@@ -10,7 +10,6 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Exception;
-use Illuminate\Validation\ValidationException;
 use JetBrains\PhpStorm\ArrayShape;
 
 class PsController extends ApiController
@@ -20,10 +19,6 @@ class PsController extends ApiController
      * @var array
      */
     private array $rules;
-    private array $customMessages = [
-        'required' => "l'attribut :attribute est obligatoire.",
-        'unique' => ':attribute existe déjà.'
-    ];
 
     /**
      * Create a new controller instance.
@@ -32,7 +27,8 @@ class PsController extends ApiController
     public function __construct()
     {
         parent::__construct();
-        $this->rules = array_merge($this->psRules(),
+        $this->rules = array_merge(
+            $this->psRules(),
             $this->exProRules(),
             $this->expertiseRules(),
             $this->situationRules(),
@@ -63,9 +59,9 @@ class PsController extends ApiController
     /**
      * Store a newly created resource in storage.
      *
-     * @return mixed
+     * @return JsonResponse
      */
-    public function store(): mixed
+    public function store(): JsonResponse
     {
         $psId = request()->nationalId;
         $validatedPs = $this->validatePs();
@@ -205,87 +201,15 @@ class PsController extends ApiController
         return $this->successResponse($this->printId($psId), 'Supression du Ps avec succès.');
     }
 
-    private function psRules(): array
-    {
-        return [
-            'idType' => 'nullable|string',
-            'id' => 'nullable|string',
-            'nationalId' => 'required', //'required|unique:ps',
-            'lastName' => 'nullable|string',
-            'firstName' => 'nullable|string',
-            'dateOfBirth' => 'nullable|string',
-            'birthAddressCode' => 'nullable|string',
-            'birthCountryCode' => 'nullable|string',
-            'birthAddress' => 'nullable|string',
-            'genderCode' => 'nullable|string',
-            'phone' => 'nullable|string',
-            'email' => 'nullable|string',
-            'salutationCode' => 'nullable|string',
-            'professions' => 'nullable|array'
-        ];
-    }
-
-    /**
-     * @return string[]
-     */
-    private function exProRules(): array
-    {
-        return [
-            'professions.*.code' => 'nullable|string',
-            'professions.*.categoryCode' => 'nullable|string',
-            'professions.*.salutationCode' => 'nullable|string',
-            'professions.*.lastName' => 'nullable|string',
-            'professions.*.firstName' => 'nullable|string',
-            'professions.*.expertises' => 'nullable|array',
-            'professions.*.workSituations' => 'nullable|array',
-        ];
-    }
-
-    private function expertiseRules(): array
-    {
-        return [
-            'professions.*.expertises.*.typeCode' => 'nullable|string',
-            'professions.*.expertises.*.code' => 'nullable|string',
-        ];
-    }
-
-    private function situationRules(): array
-    {
-        return [
-            'professions.*.workSituations.*.modeCode' => 'nullable|string',
-            'professions.*.workSituations.*.activitySectorCode' => 'nullable|string',
-            'professions.*.workSituations.*.pharmacistTableSectionCode' => 'nullable|string',
-            'professions.*.workSituations.*.roleCode' => 'nullable|string',
-            'professions.*.workSituations.*.structures' => 'nullable|array'
-        ];
-    }
-
-    private function structureRefRules(): array
-    {
-        return [
-            'professions.*.workSituations.*.structures.*.structureId' => 'nullable|String'
-        ];
-    }
-
     protected function validatePs($nationalId = null): array
     {
         $psData = request()->all();
         $psData['nationalId'] = $nationalId ?? $psData['nationalId'];
-        $validator = Validator::make($psData, $this->rules, $this->customMessages);
+        $validator = Validator::make($psData, $this->rules, $this->getCustomMessages());
 
-        if ($validator->fails()) {
-            $this->errorResponse($validator->errors()->first(), 500)->send();
-            die();
-        }
-
-        try {
-            $ps = $this->injectCompositeIds($validator->validate());
-        } catch (ValidationException $e) {
-            $this->errorResponse($e->getMessage(), 500)->send();
-            die();
-        }
-
-        return $ps;
+        // don't try-catch this block
+        // we need it to throw a validation exception that will be handled by handler.
+        return $this->injectCompositeIds($validator->validate());
     }
 
     #[ArrayShape(['nationalId' => "string"])]

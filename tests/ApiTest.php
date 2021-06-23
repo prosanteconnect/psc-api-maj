@@ -79,7 +79,6 @@ class ApiTest extends TestCase
             ['CONTENT_TYPE' => 'application/json'],
             $ps
         );
-        print_r($response->content());
         $data = json_decode($response->content())->data;
         $this->assertEquals(200, $response->status());
         $this->assertEquals('123456/7891-REF', $data->nationalId);
@@ -88,6 +87,25 @@ class ApiTest extends TestCase
         $this->assertEquals(200, $response->status());
         $this->assertEquals('123456/7891-REF', $data->nationalId);
         $this->assertEquals('JEAN LUC', $data->firstName);
+    }
+
+    public function testPutPsWrongAttribute()
+    {
+        $this->psSetup('PUT');
+        $ps = '{"idType":"3","id":"190000042/021721",
+        "nationalId":"123456/7891-REF","lastName":"PROS","firstName":"JEAN LUC","fake-attribute":"wrong"}';
+        $response = $this->call(
+            'PUT',
+            '/api/ps',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            $ps
+        );
+        $message = json_decode($response->content())->message;
+        $this->assertEquals(500, $response->status());
+        $this->assertEquals("l'attribut fake-attribute est illégal.", $message);
     }
 
     public function testPsGetProfessions() {
