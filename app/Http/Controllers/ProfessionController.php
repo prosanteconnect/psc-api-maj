@@ -4,10 +4,26 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
+use JetBrains\PhpStorm\ArrayShape;
 
 class ProfessionController extends ApiController
 {
+    private array $rules;
+
+    /**
+     * Create a new controller instance.
+     *
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->rules = array_merge(
+            $this->exProRules(''),
+            $this->expertiseRules('expertises.*.'),
+            $this->situationRules('workSituations.*.'),
+            $this->structureRefRules('workSituations.*.structures.*.')
+        );
+    }
 
     /**
      * Display a listing of the resource.
@@ -76,44 +92,17 @@ class ProfessionController extends ApiController
         return $this->successResponse($this->printId($psId, $exProId), "Suppression de l'exercise pro avec succès.");
     }
 
-    private function professionRules(): array
-    {
-        return [
-            'code' => 'nullable|string',
-            'categoryCode'=> 'nullable|string',
-            'salutationCode'=> 'nullable|string',
-            'lastName'=> 'nullable|string',
-            'firstName'=> 'nullable|string',
-            'expertises'=> 'nullable|string',
-            'workSituations' => 'nullable|string'
-        ];
-    }
-
     private function validateProfession(): array
     {
-        $customMessages = [
-            'required' => "l'attribut :attribute est obligatoire.",
-            'unique' => ':attribute existe déjà.'
-        ];
+        $validator = Validator::make(request()->all(), $this->rules, $this->getCustomMessages());
 
-        $validator = Validator::make(request()->all(), $this->professionRules(), $customMessages);
-
-        if ($validator->fails()) {
-            $this->errorResponse($validator->errors()->first(), 500)->send();
-            die();
-        }
-
-        try {
-            $profession = $validator->validate();
-            $profession['exProId'] = $this->getProfessionCompositeId($profession);
-            return $profession;
-        } catch (ValidationException $e) {
-            $this->errorResponse($e->getMessage(), 500)->send();
-            die();
-        }
+        $profession = $validator->validate();
+        $profession['exProId'] = $this->getProfessionCompositeId($profession);
+        return $profession;
     }
 
-    private function printId($psId, $exProId)
+    #[ArrayShape(['nationalId' => "string", 'exProId' => ""])]
+    private function printId($psId, $exProId): array
     {
         return array('nationalId'=>urldecode($psId), 'exProId'=>$exProId);
     }

@@ -90,7 +90,7 @@ class ApiController extends BaseController
             // there's reference to a Ps
             if ($ps) return false;
             // there's reference to nowhere. Delete link. Return true
-            Log::info('There is reference to '.$psId.' but Ps does not exist. deleting link');
+            Log::info('There is a reference to '.$psId.' but Ps does not exist. deleting link');
             $psRef->delete();
         } else {
             $ps = Ps::query()->find($psRefId);
@@ -137,7 +137,7 @@ class ApiController extends BaseController
      * @param $structureId
      * @return Structure
      */
-    protected function getStructureOrFail($structureId) : Structure
+    protected function getStructureOrFail($structureId): Structure
     {
         try {
             $structure = Structure::query()->findOrFail($structureId);
@@ -202,6 +202,10 @@ class ApiController extends BaseController
         return $situation;
     }
 
+    /**
+     * @param $psId
+     * @return array
+     */
     #[ArrayShape(['nationalIdRef' => "string", 'nationalId' => "string", 'activated' => "float|int|string"])]
     protected function psLink($psId): array
     {
@@ -212,11 +216,19 @@ class ApiController extends BaseController
         ];
     }
 
+    /**
+     * @param $psRef
+     * @return bool
+     */
     protected function isActive($psRef): bool
     {
         return ($psRef->activated - $psRef->deactivated) >= 0;
     }
 
+    /**
+     * @param $profession
+     * @return string
+     */
     protected function getProfessionCompositeId($profession): string
     {
         $exProId = ($profession['code'] ?? '')
@@ -227,6 +239,10 @@ class ApiController extends BaseController
         return $exProId;
     }
 
+    /**
+     * @param $expertise
+     * @return string
+     */
     protected function getExpertiseCompositeId($expertise): string
     {
         $expertiseId = ($expertise['typeCode'] ?? '')
@@ -237,6 +253,10 @@ class ApiController extends BaseController
         return $expertiseId;
     }
 
+    /**
+     * @param $situation
+     * @return string
+     */
     protected function getSituationCompositeId($situation): string
     {
         $situId = ($situation['modeCode'] ?? '')
@@ -249,6 +269,11 @@ class ApiController extends BaseController
         return $situId;
     }
 
+    /**
+     * @param $psId
+     * @param $validPs
+     * @return bool
+     */
     protected function savePs($psId, $validPs): bool
     {
         if ($this->isNewPs($psId)) {
@@ -269,5 +294,129 @@ class ApiController extends BaseController
             }
         }
         return true;
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getCustomMessages(): array
+    {
+        return [
+            'required' => "l'attribut :attribute est obligatoire.",
+            'unique' => ':attribute existe déjà.',
+            'forbidden_attribute' => "l'attribut :attribute est illégal."
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function psRules(): array
+    {
+        return [
+            'idType' => 'nullable|string',
+            'id' => 'nullable|string',
+            'nationalId' => 'required', //'required|unique:ps',
+            'lastName' => 'nullable|string',
+            'firstName' => 'nullable|string',
+            'dateOfBirth' => 'nullable|string',
+            'birthAddressCode' => 'nullable|string',
+            'birthCountryCode' => 'nullable|string',
+            'birthAddress' => 'nullable|string',
+            'genderCode' => 'nullable|string',
+            'phone' => 'nullable|string',
+            'email' => 'nullable|string',
+            'salutationCode' => 'nullable|string',
+            'professions' => 'nullable|array'
+        ];
+    }
+
+    /**
+     * @param String $nested
+     * @return string[]
+     */
+    protected function exProRules(String $nested = 'professions.*.'): array
+    {
+        return [
+            $nested.'code' => 'nullable|string',
+            $nested.'categoryCode' => 'nullable|string',
+            $nested.'salutationCode' => 'nullable|string',
+            $nested.'lastName' => 'nullable|string',
+            $nested.'firstName' => 'nullable|string',
+            $nested.'expertises' => 'nullable|array',
+            $nested.'workSituations' => 'nullable|array',
+        ];
+    }
+
+    /**
+     * @param string $nested
+     * @return string[]
+     */
+    protected function expertiseRules(String $nested = 'professions.*.expertises.*.'): array
+    {
+        return [
+            $nested.'typeCode' => 'nullable|string',
+            $nested.'code' => 'nullable|string',
+        ];
+    }
+
+    /**
+     * @param string $nested
+     * @return string[]
+     */
+    protected function situationRules(String $nested = 'professions.*.workSituations.*.'): array
+    {
+        return [
+            $nested.'modeCode' => 'nullable|string',
+            $nested.'activitySectorCode' => 'nullable|string',
+            $nested.'pharmacistTableSectionCode' => 'nullable|string',
+            $nested.'roleCode' => 'nullable|string',
+            $nested.'structures' => 'nullable|array'
+        ];
+    }
+
+    /**
+     * @param string $nested
+     * @return string[]
+     */
+    protected function structureRefRules(String $nested = 'professions.*.workSituations.*.structures.*.'): array
+    {
+        return [
+            $nested.'structureId' => 'nullable|String'
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function structureRules(): array
+    {
+        return [
+            'siteSIRET' => 'nullable|string',
+            'siteSIREN' => 'nullable|string',
+            'siteFINESS' => 'nullable|string',
+            'legalEstablishmentFINESS' => 'nullable|string',
+            'structureTechnicalId' => 'required',
+            'legalCommercialName' => 'nullable|string', # raison sociale site
+            'publicCommercialName' => 'nullable|string', # enseigne commerciale site
+            'recipientAdditionalInfo' => 'nullable|string', # Complément destinataire
+            'geoLocationAdditionalInfo' => 'nullable|string', # Complément point géographique
+            'streetNumber' => 'nullable|string', # Numéro Voie
+            'streetNumberRepetitionIndex' => 'nullable|string', # Indice répétition voie
+            'streetCategoryCode' => 'nullable|string', # Code type de voie
+            'streetLabel' => 'nullable|string', # Libellé Voie
+            'distributionMention' => 'nullable|string', # Mention distribution
+            'cedexOffice' => 'nullable|string',
+            'postalCode' => 'nullable|string',
+            'communeCode' => 'nullable|string',
+            'countryCode' => 'nullable|string',
+            'phone' => 'nullable|string',
+            'phone2' => 'nullable|string',
+            'fax' => 'nullable|string',
+            'email' => 'nullable|string',
+            'departmentCode' => 'nullable|string',
+            'oldStructureId' => 'nullable|string',
+            'registrationAuthority' => 'nullable|string'
+        ];
     }
 }
