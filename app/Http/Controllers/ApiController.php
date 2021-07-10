@@ -112,7 +112,7 @@ class ApiController extends BaseController
     protected function isNewStructure($structureId) : bool
     {
         $structure = Structure::query()->find(urldecode($structureId));
-        if ($structure) false;
+        if ($structure) return false;
         return true;
     }
 
