@@ -1,0 +1,700 @@
+openapi: 3.0.0
+info:
+  title: psc-maj-api
+  version: '1.0'
+  description: API de mise à jour des données de professionnels de santé
+  contact:
+    name: Christian Nader
+    email: christian.nader.ext@esante.gouv.fr
+servers:
+  - url: 'https://psc-api-maj'
+paths:
+  /ps:
+    get:
+      summary: PS Index
+      tags: []
+      operationId: get-ps
+      description: Display a listing of PS.
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+    post:
+      summary: Create PS
+      operationId: post-ps
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+      description: Store a newly created PS.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ps'
+            examples:
+              example PS:
+                $ref: '#/components/examples/PS'
+        description: Json representation of the PS
+    put:
+      summary: Create or Update PS
+      operationId: put-ps
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+      description: Store or Update the PS including its nested entities.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ps'
+            examples:
+              full PS:
+                $ref: '#/components/examples/full-PS'
+        description: Json representation of the PS
+  '/ps/{nationalId}':
+    parameters:
+      - schema:
+          type: string
+        name: nationalId
+        in: path
+        required: true
+    get:
+      summary: Show PS
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      operationId: get-ps-nationalId
+      description: Display the specified PS.
+    put:
+      summary: ''
+      operationId: put-ps-nationalId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Update the specified PS.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ps'
+            examples:
+              example PS:
+                $ref: '#/components/examples/PS'
+        description: Json representation of the PS
+    delete:
+      summary: ''
+      operationId: delete-ps-nationalId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Delete the specified PS.
+  '/ps/{nationalId}/professions':
+    parameters:
+      - schema:
+          type: string
+        name: nationalId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      operationId: get-ps-nationalId-professions
+      description: Display a listing of Professions of a PS.
+    post:
+      summary: ''
+      operationId: post-ps-nationalId-professions
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Store a newly created Profession of a PS.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profession'
+            examples:
+              example Profession:
+                $ref: '#/components/examples/Profession'
+        description: Json representation of the Profession
+  '/ps/{nationalId}/professions/{exProId}':
+    parameters:
+      - schema:
+          type: string
+        name: nationalId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: exProId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      operationId: get-ps-nationalId-professions-exProId
+      description: Display the specified Profession of a PS.
+    put:
+      summary: ''
+      operationId: put-ps-nationalId-professions-exProId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Update the specified Profession of a PS.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profession'
+            examples:
+              example Profession:
+                $ref: '#/components/examples/Profession'
+        description: Json representation of the Profession
+    delete:
+      summary: ''
+      operationId: delete-ps-nationalId-professions-exProId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Delete the specified Profession of this PS.
+  '/ps/{nationalId}/professions/{exProId}/expertises':
+    parameters:
+      - schema:
+          type: string
+        name: nationalId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: exProId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      operationId: get-ps-nationalId-professions-exProId-expertises
+      description: Display a listing of Expertises for a specified Profession of a PS.
+    post:
+      summary: ''
+      operationId: post-ps-nationalId-professions-exProId-expertises
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Store a newly created Expertise for a specified Profession of a PS.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Expertise'
+            examples:
+              example Expertise:
+                $ref: '#/components/examples/Expertise'
+  '/ps/{nationalId}/professions/{exProId}/expertises/{expertiseId}':
+    parameters:
+      - schema:
+          type: string
+        name: nationalId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: exProId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: expertiseId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      operationId: get-ps-nationalId-professions-exProId-expertises-expertiseId
+      description: Display the specified Expertise of a specified Profession of a PS.
+    put:
+      summary: ''
+      operationId: put-ps-nationalId-professions-exProId-expertises-expertiseId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Update the specified Expertise for a specified Profession of a PS.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Expertise'
+            examples:
+              example Expertise:
+                $ref: '#/components/examples/Expertise'
+        description: Json representation of the Expertise
+    delete:
+      summary: ''
+      operationId: delete-ps-nationalId-professions-exProId-expertises-expertiseId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Delete the specified Expertise for a specified Profession of a PS.
+  '/ps/{nationalId}/professions/{exProId}/situations':
+    parameters:
+      - schema:
+          type: string
+        name: nationalId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: exProId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      operationId: get-ps-nationalId-professions-exProId-situations
+      description: Display a listing of WorkSituations for a specified Profession of a PS.
+    post:
+      summary: ''
+      operationId: post-ps-nationalId-professions-exProId-situations
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Store a newly created WorkSituation for a specified Profession of a PS.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkSituation'
+            examples:
+              example WorkSituation:
+                $ref: '#/components/examples/WorkSituation'
+  '/ps/{nationalId}/professions/{exProId}/situations/{situId}':
+    parameters:
+      - schema:
+          type: string
+        name: nationalId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: exProId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: situId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      operationId: get-ps-nationalId-professions-exProId-situations-situId
+      description: Display a specified WorkSituation of a specified Profession of a PS.
+    put:
+      summary: ''
+      operationId: put-ps-nationalId-professions-exProId-situations-situId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Update the specified WorkSituation for a specified Profession of a PS.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkSituation'
+            examples:
+              example WorkSituation:
+                $ref: '#/components/examples/WorkSituation'
+        description: Json representation of the WorkSituation
+    delete:
+      summary: ''
+      operationId: delete-ps-nationalId-professions-exProId-situations-situId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Delete the specified WorkSituation for a specified Profession of a PS.
+  /structures:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+      operationId: get-structures
+      description: Display a listing of Structures
+    post:
+      summary: ''
+      operationId: post-structures
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+      description: Store a newly created Structure.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Structure'
+            examples:
+              example Structure:
+                $ref: '#/components/examples/Structure'
+        description: Json representation of the Structure
+  '/structure/{structureId}':
+    parameters:
+      - schema:
+          type: string
+        name: structureId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+      operationId: get-structure-structureId
+      description: Display a specified Structure
+    put:
+      summary: ''
+      operationId: put-structure-structureId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Update the specified Structure.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Structure'
+            examples:
+              example Structure:
+                $ref: '#/components/examples/Structure'
+        description: Json representation of the Structure
+    delete:
+      summary: ''
+      operationId: delete-structure-structureId
+      responses:
+        '200':
+          $ref: '#/components/responses/Response'
+        '404':
+          $ref: '#/components/responses/Response'
+      description: Delete the specified Structure.
+components:
+  schemas:
+    Structure:
+      title: Structure
+      type: object
+      description: Structure
+      properties:
+        siteSIRET:
+          type: string
+        siteSIREN:
+          type: string
+        siteFINESS:
+          type: string
+        legalEstablishmentFINESS:
+          type: string
+        structureTechnicalId:
+          type: string
+        legalCommercialName:
+          type: string
+        publicCommercialName:
+          type: string
+        recipientAdditionalInfo:
+          type: string
+        geoLocationAdditionalInfo:
+          type: string
+        streetNumber:
+          type: string
+        streetNumberRepetitionIndex:
+          type: string
+        streetCategoryCode:
+          type: string
+        streetLabel:
+          type: string
+        distributionMention:
+          type: string
+        cedexOffice:
+          type: string
+        postalCode:
+          type: string
+        communeCode:
+          type: string
+        countryCode:
+          type: string
+        phone:
+          type: string
+        phone2:
+          type: string
+        fax:
+          type: string
+        email:
+          type: string
+        departmentCode:
+          type: string
+        oldStructureId:
+          type: string
+        registrationAuthority:
+          type: string
+    WorkSituation:
+      title: WorkSituation
+      type: object
+      description: Situation d'exercice
+      properties:
+        situId:
+          type: string
+        modeCode:
+          type: string
+        activitySectorCode:
+          type: string
+        pharmacistTableSectionCode:
+          type: string
+        roleCode:
+          type: string
+        structure:
+          $ref: '#/components/schemas/Structure'
+    Expertise:
+      title: Expertise
+      type: object
+      description: Savoir faire
+      properties:
+        expertiseId:
+          type: string
+        code:
+          type: string
+        categoryCode:
+          type: string
+    Profession:
+      title: Profession
+      type: object
+      description: Exercice professionel
+      properties:
+        exProId:
+          type: string
+        code:
+          type: string
+        categoryCode:
+          type: string
+        salutationCode:
+          type: string
+        lastName:
+          type: string
+        firstName:
+          type: string
+        expertises:
+          type: array
+          items:
+            $ref: '#/components/schemas/Expertise'
+        workSituations:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkSituation'
+    Ps:
+      title: Ps
+      type: object
+      properties:
+        idType:
+          type: string
+        id:
+          type: string
+        nationalId:
+          type: string
+        lastName:
+          type: string
+        firstName:
+          type: string
+        dateOfBirth:
+          type: string
+        birthAddressCode:
+          type: string
+        birthCountryCode:
+          type: string
+        birthAddress:
+          type: string
+        genderCode:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        salutationCode:
+          type: string
+        professions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Profession'
+      description: Professionel de santé
+  responses:
+    Response:
+      description: Response model
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+              data:
+                oneOf:
+                  - $ref: '#/components/schemas/Ps'
+                  - $ref: '#/components/schemas/Profession'
+                  - $ref: '#/components/schemas/Expertise'
+                  - $ref: '#/components/schemas/WorkSituation'
+                  - $ref: '#/components/schemas/Structure'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Ps'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Profession'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Expertise'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/WorkSituation'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Structure'
+  examples:
+    full-PS:
+      value:
+        idType: '8'
+        id: '10100022408'
+        nationalId: '810100022408'
+        lastName: TAÏEB
+        firstName: Johanna'Yvonne'
+        dateOfBirth: 17/08/1982
+        birthAddressCode: '75114'
+        birthCountryCode: '99000'
+        birthAddress: PARIS 14E  ARRONDISSEMENT
+        genderCode: F
+        phone: '0617559233'
+        email: joana1708@hotmail.com
+        salutationCode: MME
+        professions:
+          - code: '21'
+            categoryCode: C
+            salutationCode: DR
+            lastName: TAIEB
+            firstName: JOHANNA
+            expertises: []
+            workSituations:
+              - modeCode: L
+                activitySectorCode: SA33
+                pharmacistTableSectionCode: A
+                structure:
+                  siteFINESS: '920009347'
+                  legalEstablishmentFINESS: '920009321'
+                  structureTechnicalId: F92000934714112016
+                  legalCommercialName: PHARMACIE TAIEB
+                  publicCommercialName: SELARL PHARMACIE NOUVELLE
+                  streetNumber: '81'
+                  streetCategoryCode: R
+                  streetLabel: DES BOURGUIGNONS
+                  cedexOffice: 92270 BOIS-COLOMBES
+                  postalCode: '92270'
+                  communeCode: '92009'
+                  countryCode: '99000'
+                  oldStructureId: '1920009347'
+                  registrationAuthority: CNOP/CNOP/ARS + CNOP
+                situId: L
+            exProId: 21C
+    PS:
+      value:
+        idType: '8'
+        id: '10002821709'
+        nationalId: '810002821709'
+        lastName: RAPAPORT
+        firstName: STEPHANE'ANDRE'EDOUARD
+        dateOfBirth: 20/06/1969
+        birthAddressCode: '26362'
+        birthCountryCode: '99000'
+        genderCode: M
+        email: steph.rapaport@sfr.fr
+        salutationCode: M
+    Profession:
+      value:
+        code: '10'
+        categoryCode: C
+        salutationCode: DR
+        lastName: RAPAPORT
+        firstName: STEPHANE
+    Expertise:
+      value:
+        categoryCode: S
+        code: SM02
+        expertiseId: SM02S
+    WorkSituation:
+      value:
+        modeCode: L
+        activitySectorCode: SA09
+    Structure:
+      value:
+        siteSIRET: '79101156200018'
+        structureTechnicalId: R10100000102962
+        legalCommercialName: STEPHANE RAPAPORT
+        geoLocationAdditionalInfo: CLINIQUE SAINT AUGUSTIN
+        streetNumber: '114'
+        streetLabel: AVENUE D ARES
+        cedexOffice: 33074 BORDEAUX CEDEX
+        postalCode: '33074'
+        communeCode: '33063'
+        countryCode: '99000'
+        oldStructureId: '379101156200018'
+        registrationAuthority: CNOM/CNOM/CNOM
+  securitySchemes: {}
