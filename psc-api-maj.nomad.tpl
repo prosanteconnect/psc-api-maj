@@ -1,0 +1,78 @@
+job "psc-api-maj" {
+    datacenters = ["dc1"]
+    type = "service"
+    vault {
+        policies = ["psc-ecosystem"]
+        change_mode = "restart"
+    }
+    group "psc-api-maj" {
+        count = "1"
+        restart {
+            attempts = 3
+            delay = "60s"
+            interval = "1h"
+            mode = "fail"
+        }
+        update {
+            max_parallel      = 1
+            canary            = 1
+            min_healthy_time  = "30s"
+            progress_deadline = "5m"
+            healthy_deadline  = "2m"
+            auto_revert       = true
+            auto_promote      = true
+        }
+        network {
+            mode = "host"
+            port "http" {
+                to = 80
+            }
+        }
+        task "psc-api-maj" {
+            driver = "docker"
+            config {
+                image = "${artifact.image}:${artifact.tag}"
+                ports = ["http"]
+            }
+            template {
+                data = <<EOH
+                    APP_NAME=psc-api-maj
+                    APP_ENV=test
+                    APP_KEY={{ with secret "psc-ecosystem/psc-api-maj" }}{{ .Data.data.app_key }}{{ end }}
+                    APP_DEBUG=true
+                    APP_URL=https://localhost
+                    LOG_CHANNEL=errorlog
+                    LOG_LEVEL=info
+                    MONGO_DB_DATABASE=mongodb
+                    MONGO_DB_HOST={{ range service "psc-mongodb" }}{{ .Address }}{{ end }}
+                    MONGO_DB_PORT={{ range service "psc-mongodb" }}{{ .Port }}{{ end }}
+                    MONGO_DB_USERNAME=
+                    MONGO_DB_PASSWORD=
+                    QUEUE_CONNECTION=database
+                EOH
+                destination = "secrets/.env"
+                change_mode = "noop"
+                env = true
+            }
+            resources {
+                cpu = 2048
+                memory = 512
+            }
+            service {
+                name = "$\u007BNOMAD_JOB_NAME\u007D"
+                meta {
+                    gravitee_path = "/api/"
+                }
+                canary_tags = ["canary instance to promote"]
+                port = "http"
+                check {
+                    type = "tcp"
+                    port = "http"
+                    interval = "10s"
+                    timeout = "2s"
+                }
+            }
+        }
+    }
+}
+
