@@ -301,6 +301,7 @@ class ApiController extends BaseController
      */
     protected function getCustomMessages(): array
     {
+        // custom messages
         return [
             'required' => "l'attribut :attribute est obligatoire.",
             'unique' => ':attribute existe déjà.',
