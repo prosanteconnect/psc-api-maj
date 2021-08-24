@@ -45,9 +45,9 @@ job "psc-api-maj" {
                     LOG_CHANNEL=errorlog
                     LOG_LEVEL=info
                     MONGO_DB_DATABASE=mongodb
-                    MONGO_DB_HOST={{ range service "psc-mongodb" }}{{ .Address }}{{ end }}
-                    MONGO_DB_PORT={{ range service "psc-mongodb" }}{{ .Port }}{{ end }}
-                    MONGO_DB_USERNAME= {{ with secret "psc-ecosystem/mongodb" }}{{ .Data.data.root_user }}{{ end }}
+                    MONGO_DB_HOST = {{ range service "psc-mongodb" }}{{ .Address }}{{ end }}
+                    MONGO_DB_PORT = {{ range service "psc-mongodb" }}{{ .Port }}{{ end }}
+                    MONGO_DB_USERNAME = {{ with secret "psc-ecosystem/mongodb" }}{{ .Data.data.root_user }}{{ end }}
                     MONGO_DB_PASSWORD = {{ with secret "psc-ecosystem/mongodb" }}{{ .Data.data.root_pass }}{{ end }}
                     QUEUE_CONNECTION=database
                 EOH
