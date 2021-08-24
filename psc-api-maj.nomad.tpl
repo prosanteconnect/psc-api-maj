@@ -1,6 +1,7 @@
 job "psc-api-maj" {
     datacenters = ["dc1"]
     type = "service"
+
     vault {
         policies = ["psc-ecosystem"]
         change_mode = "restart"
@@ -46,8 +47,8 @@ job "psc-api-maj" {
                     MONGO_DB_DATABASE=mongodb
                     MONGO_DB_HOST={{ range service "psc-mongodb" }}{{ .Address }}{{ end }}
                     MONGO_DB_PORT={{ range service "psc-mongodb" }}{{ .Port }}{{ end }}
-                    MONGO_DB_USERNAME=
-                    MONGO_DB_PASSWORD=
+                    MONGO_DB_USERNAME= {{ with secret "psc-ecosystem/mongodb" }}{{ .Data.data.root_user }}{{ end }}
+                    MONGO_DB_PASSWORD = {{ with secret "psc-ecosystem/mongodb" }}{{ .Data.data.root_pass }}{{ end }}
                     QUEUE_CONNECTION=database
                 EOH
                 destination = "secrets/.env"
@@ -60,9 +61,6 @@ job "psc-api-maj" {
             }
             service {
                 name = "$\u007BNOMAD_JOB_NAME\u007D"
-                meta {
-                    gravitee_path = "/api/"
-                }
                 canary_tags = ["canary instance to promote"]
                 port = "http"
                 check {
