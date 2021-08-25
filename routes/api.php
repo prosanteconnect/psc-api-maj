@@ -27,8 +27,6 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->put('ps/{psId}', ['uses' => 'PsController@update']);
     $router->delete('ps/{psId}', ['uses' => 'PsController@destroy']);
 
-    // $router->post('ps/aggregate',  ['uses' => 'PsController@aggregate']);
-
     $router->get('ps/{psId}/professions', ['uses' => 'ProfessionController@index']);
     $router->post('ps/{psId}/professions', ['uses' => 'ProfessionController@store']);
     $router->get('ps/{psId}/professions/{exProId}', ['uses' => 'ProfessionController@show']);
