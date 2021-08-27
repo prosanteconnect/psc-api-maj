@@ -28,7 +28,7 @@ class ApiTest extends TestCase
         $response = $this->call('GET', '/api/ps');
         $data = json_decode($response->content())->data;
         $this->assertEquals(200, $response->status());
-        $this->assertCount(2, $data);
+        $this->assertCount(3, $data);
         $this->assertEquals('06******44', $data[0]->phone);
         $this->assertEquals('hel************@g****.com', $data[1]->email);
     }
