@@ -34,6 +34,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
+        "test": "vendor/bin/phpunit tests",
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ]
