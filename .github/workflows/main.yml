@@ -7,8 +7,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Start MongoDB
-      uses: supercharge/mongodb-github-action@1.6.0
-      with:
-        mongodb-version: 5.0
-    - uses: nathanheffley/laravel-phpunit-action@master
+    - uses: php-actions/composer@v5 # or alternative dependency management
+    - uses: php-actions/phpunit@v3
