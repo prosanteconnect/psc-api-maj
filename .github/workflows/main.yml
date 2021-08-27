@@ -6,5 +6,15 @@ jobs:
     name: PHPUnit
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: nathanheffley/laravel-phpunit-action@master
+    - uses: actions/checkout@v2
+    - uses: php-actions/composer@v6
+      with:
+        php_extensions: pdo_mysql exif sockets
+    - run: pecl install mongodb
+    - run: docker-php-ext-enable mongodb
+    - run: echo "extension=mongodb.so" >> "$PHP_INI_DIR/php.ini"
+    - name: PHPUnit tests
+      uses: php-actions/phpunit@v3
+      with:
+        configuration: custom/path/to/phpunit.xml
+        php_extensions: docker-php-ext-install pdo_mysql exif sockets
