@@ -52,7 +52,7 @@ job "psc-api-maj" {
                     QUEUE_CONNECTION=database
                 EOH
                 destination = "secrets/.env"
-                change_mode = "restart"
+                change_mode = "noop"  // this is a problem
                 env = true
             }
             resources {
