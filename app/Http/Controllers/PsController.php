@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\AggregatePsJob;
 use App\Models\Ps;
 
 use App\Models\PsRef;
@@ -10,7 +9,6 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Exception;
-use JetBrains\PhpStorm\ArrayShape;
 
 class PsController extends ApiController
 {
@@ -47,16 +45,6 @@ class PsController extends ApiController
     }
 
     /**
-     * Aggregate Ps into extractRass.
-     *
-     */
-    public function aggregate(): JsonResponse
-    {
-        $this->dispatch(new AggregatePsJob());
-        return $this->successResponse(null, 'Aggregation initialized');
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @return JsonResponse
@@ -89,7 +77,7 @@ class PsController extends ApiController
                 $psRef = PsRef::query()->find(urldecode($psId));
                 $ps = Ps::query()->find($psRef['nationalId']);
             }
-        } catch (Exception) { // in case of concurrent create in DB
+        } catch (Exception $ex) { // in case of concurrent create in DB
             $psRef = PsRef::query()->find(urldecode($psId));
             $ps = Ps::query()->find($psRef['nationalId']);
         }
@@ -212,7 +200,6 @@ class PsController extends ApiController
         return $this->injectCompositeIds($validator->validate());
     }
 
-    #[ArrayShape(['nationalId' => "string"])]
     private function printId($psId): array
     {
         return array('nationalId'=>urldecode($psId));

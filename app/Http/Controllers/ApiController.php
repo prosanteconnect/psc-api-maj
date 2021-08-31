@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use JetBrains\PhpStorm\ArrayShape;
 use Laravel\Lumen\Routing\Controller as BaseController;
+use function PHPUnit\Framework\throwException;
 
 /**
  * Class ApiController
@@ -124,7 +125,11 @@ class ApiController extends BaseController
     {
         try {
             $psRef = PsRef::query()->findOrFail(urldecode($psId));
-            $ps = Ps::query()->findOrFail($psRef['nationalId']);
+            if ($this->isActive($psRef)) {
+                $ps = Ps::query()->findOrFail($psRef['nationalId']);
+            } else {
+                throw new ModelNotFoundException();
+            }
         } catch(ModelNotFoundException) {
             $this->notFoundResponse("Ce professionel n'exist pas.",
                 array('nationalId' => urldecode($psId)))->send();

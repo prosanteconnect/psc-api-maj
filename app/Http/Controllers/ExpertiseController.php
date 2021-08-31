@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-use JetBrains\PhpStorm\ArrayShape;
 
 class ExpertiseController extends ApiController
 {
@@ -111,7 +110,6 @@ class ExpertiseController extends ApiController
 
     }
 
-    #[ArrayShape(['nationalId' => "string", 'exProId' => "", 'expertiseId' => ""])]
     private function printId($psId, $exProId, $expertiseId): array
     {
         return array('nationalId'=>urldecode($psId), 'exProId'=>$exProId, 'expertiseId'=>$expertiseId);
