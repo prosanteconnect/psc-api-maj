@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-use JetBrains\PhpStorm\ArrayShape;
 
 class WorkSituationController extends ApiController
 {
@@ -113,7 +112,6 @@ class WorkSituationController extends ApiController
         return $situation;
     }
 
-    #[ArrayShape(['nationalId' => "string", 'exProId' => "", 'situId' => ""])]
     private function printId($psId, $exProId, $situId): array
     {
         return array('nationalId'=>urldecode($psId), 'exProId'=>$exProId, 'situId'=>$situId);

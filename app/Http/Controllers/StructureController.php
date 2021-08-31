@@ -6,8 +6,6 @@ use App\Models\Structure;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use JetBrains\PhpStorm\ArrayShape;
 
 class StructureController extends ApiController
 {
@@ -49,7 +47,7 @@ class StructureController extends ApiController
             try {
                 Structure::query()->create($validatedStructure);
                 return $this->successResponse($this->printId($structureId), 'Creation de la structure avec succès.');
-            } catch (Exception) { // in case of concurrent create in DB
+            } catch (Exception $ex) { // in case of concurrent create in DB
                 $structure = Structure::query()->find(urldecode($structureId));
             }
         }
@@ -104,7 +102,6 @@ class StructureController extends ApiController
         return $validator->validate();
     }
 
-    #[ArrayShape(['structureId' => "string"])]
     private function printId($structureId): array
     {
         return array('structureId'=>urldecode($structureId));

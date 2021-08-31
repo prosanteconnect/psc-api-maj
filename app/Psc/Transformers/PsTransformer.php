@@ -3,9 +3,6 @@
 
 namespace App\Psc\Transformers;
 
-
-use JetBrains\PhpStorm\Pure;
-
 /**
  * Class PsTransformer
  * @package App\Psc\Transformers
@@ -66,7 +63,6 @@ class PsTransformer extends Transformer {
      * @param $number
      * @return string
      */
-    #[Pure]
     private function hidePhone($number): string
     {
         if($number && $number[0]=='+'){

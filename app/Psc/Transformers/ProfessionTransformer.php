@@ -10,8 +10,8 @@ namespace App\Psc\Transformers;
  */
 class ProfessionTransformer extends Transformer {
 
-    protected $expertiseTransformer;
-    protected $workSituationTransformer;
+    protected ExpertiseTransformer $expertiseTransformer;
+    protected WorkSituationTransformer $workSituationTransformer;
 
     /**
      * Create a new controller instance.
