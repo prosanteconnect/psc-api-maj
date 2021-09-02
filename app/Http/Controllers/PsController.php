@@ -54,10 +54,31 @@ class PsController extends ApiController
         $psId = request()->nationalId;
         $validatedPs = $this->validatePs();
         if ($this->savePs($psId, $validatedPs)) {
-            return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès');
+            return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès.');
         } else {
             return $this->alreadyExistsResponse("Ce professionel existe déjà.",
                 array('nationalId' => urldecode($psId)));
+        }
+    }
+
+    /**
+     * Store a new created resource in storage, otherwise completely replace an existing one.
+     *
+     * @return JsonResponse
+     */
+    public function storeOrReplace(): JsonResponse
+    {
+        $psId = request()->nationalId;
+        $validPs = $this->validatePs();
+        if ($this->savePs($psId, $validPs)) {
+            return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès.');
+        } else {
+            $psRef = PsRef::query()->find(urldecode($psId));
+            $ps = $this->getPsOrFail($psRef['nationalId']);
+            $ps->delete();
+            $validPs['nationalId'] = $psRef['nationalId'];
+            Ps::query()->create($validPs);
+            return $this->successResponse($this->printId($psId), 'Les données du Ps ont été remplacé avec succès.');
         }
     }
 
@@ -72,7 +93,7 @@ class PsController extends ApiController
         $validPs = $this->validatePs();
         try {
             if ($this->savePs($psId, $validPs)) {
-                return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès');
+                return $this->successResponse($this->printId($psId), 'Creation du Ps avec succès.');
             } else {
                 $psRef = PsRef::query()->find(urldecode($psId));
                 $ps = Ps::query()->find($psRef['nationalId']);

@@ -23,9 +23,15 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('ps',  ['uses' => 'PsController@index']);
     $router->post('ps',  ['uses' => 'PsController@store']);
     $router->put('ps', ['uses' => 'PsController@storeOrUpdate']);
+    $router->put('ps/replace', ['uses' => 'PsController@storeOrReplace']);
     $router->get('ps/{psId}', ['uses' => 'PsController@show']);
     $router->put('ps/{psId}', ['uses' => 'PsController@update']);
     $router->delete('ps/{psId}', ['uses' => 'PsController@destroy']);
+
+    $router->post('psref', ['uses' => 'PsRefController@store']);
+    $router->get('psref/{psRefId}', ['uses' => 'PsRefController@show']);
+    $router->put('psref/{psRefId}', ['uses' => 'PsRefController@update']);
+    $router->delete('psref/{psRefId}', ['uses' => 'PsRefController@destroy']);
 
     $router->get('ps/{psId}/professions', ['uses' => 'ProfessionController@index']);
     $router->post('ps/{psId}/professions', ['uses' => 'ProfessionController@store']);
