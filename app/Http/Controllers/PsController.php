@@ -197,7 +197,7 @@ class PsController extends ApiController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Deactivate the specified resource.
      *
      * @param $psId
      * @return JsonResponse
@@ -207,6 +207,23 @@ class PsController extends ApiController
     {
         $psRef = PsRef::query()->findOrFail(urldecode($psId));
         $psRef->update(['deactivated' => Carbon::now()->timestamp]);
+        return $this->successResponse($this->printId($psId), 'Désactivation du Ps avec succès.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param $psId
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function forceDestroy($psId): JsonResponse
+    {
+        $psRef = PsRef::query()->findOrFail(urldecode($psId));
+        $ps = Ps::query()->findOrFail($psRef['nationalId']);
+        if ($ps->delete()) {
+            $psRef->delete();
+        }
         return $this->successResponse($this->printId($psId), 'Supression du Ps avec succès.');
     }
 
