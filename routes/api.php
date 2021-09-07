@@ -23,10 +23,10 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('ps',  ['uses' => 'PsController@index']);
     $router->post('ps',  ['uses' => 'PsController@store']);
     $router->put('ps', ['uses' => 'PsController@storeOrUpdate']);
-    $router->put('ps/replace', ['uses' => 'PsController@storeOrReplace']);
     $router->get('ps/{psId}', ['uses' => 'PsController@show']);
     $router->put('ps/{psId}', ['uses' => 'PsController@update']);
     $router->delete('ps/{psId}', ['uses' => 'PsController@destroy']);
+    $router->post('ps/force', ['uses' => 'PsController@forceStore']);
     $router->delete('ps/force/{psId}', ['uses' => 'PsController@forceDestroy']);
 
     $router->post('psref', ['uses' => 'PsRefController@store']);

@@ -66,7 +66,7 @@ class PsController extends ApiController
      *
      * @return JsonResponse
      */
-    public function storeOrReplace(): JsonResponse
+    public function forceStore(): JsonResponse
     {
         $psId = request()->nationalId;
         $validPs = $this->validatePs();
