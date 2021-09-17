@@ -77,6 +77,12 @@ class PsRefController extends ApiController
         return $this->successResponse($psRef);
     }
 
+    public function showAll(): JsonResponse
+    {
+        $storedPsRefs = PsRef::all();
+        return $this->successResponse($storedPsRefs);
+    }
+
     /**
      * Update the specified resource in storage.
      *

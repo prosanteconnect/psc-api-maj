@@ -29,6 +29,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->post('ps/force', ['uses' => 'PsController@forceStore']);
     $router->delete('ps/force/{psId}', ['uses' => 'PsController@forceDestroy']);
 
+    $router->get('psref', ['uses' => 'PsRefController@showAll']);
     $router->post('psref', ['uses' => 'PsRefController@store']);
     $router->get('psref/{psRefId}', ['uses' => 'PsRefController@show']);
     $router->put('psref/{psRefId}', ['uses' => 'PsRefController@update']);
