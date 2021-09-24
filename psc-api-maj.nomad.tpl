@@ -1,5 +1,5 @@
 job "psc-api-maj" {
-    datacenters = ["dc1"]
+    datacenters = ["${datacenter}"]
     type = "service"
 
     vault {
@@ -38,10 +38,10 @@ job "psc-api-maj" {
             template {
                 data = <<EOH
                     APP_NAME=psc-api-maj
-                    APP_ENV=test
+                    APP_ENV=production
                     APP_KEY={{ with secret "psc-ecosystem/psc-api-maj" }}{{ .Data.data.app_key }}{{ end }}
-                    APP_DEBUG=true
-                    APP_URL=https://localhost
+                    APP_DEBUG=false
+                    APP_URL=http://{{ range service "psc-api-maj" }}{{ .Address }}:{{ .Port }}{{ end }}/api
                     LOG_CHANNEL=errorlog
                     LOG_LEVEL=info
                     MONGO_DB_DATABASE=mongodb

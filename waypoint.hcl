@@ -28,8 +28,16 @@ app "prosanteconnect/psc-api-maj" {
 
     # Deploy to Nomad
     deploy {
-      use "nomad-jobspec" {    
-        jobspec = templatefile("${path.app}/psc-api-maj.nomad.tpl")
+      use "nomad-jobspec" {
+        jobspec = templatefile("${path.app}/psc-api-maj.nomad.tpl", {
+            datacenter = var.datacenter
+        })
       }
     }
+}
+
+
+variable datacenter {
+    type = string
+    default = "production"
 }
