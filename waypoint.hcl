@@ -8,6 +8,9 @@ runner {
     data_source "git" {
         url = "https://github.com/prosanteconnect/psc-api-maj.git"
         ref = var.datacenter
+        poll {
+            enabled = true
+        }
     }
 }
 
