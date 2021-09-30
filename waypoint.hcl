@@ -21,8 +21,9 @@ app "prosanteconnect/psc-api-maj" {
     build {
         use "docker" {
             build_args = {
-                "artifactory" = var.artifactory
+                "proxy_address" = var.proxy_address
             }
+            dockerfile = "${path.app}/${var.dockerfile_path}"
         }
         # Uncomment below to use a remote docker registry to push your built images.
         registry {
@@ -49,7 +50,12 @@ variable "datacenter" {
     default = "dc1"
 }
 
-variable "artifactory" {
+variable "proxy_address" {
     type = string
-    default = "1"
+    default = "proxy_address"
+}
+
+variable "dockerfile_path" {
+    type = string
+    default = "Dockerfile"
 }
