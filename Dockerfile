@@ -1,9 +1,12 @@
 FROM php:apache-buster
 
 # app version, set with docker build --build-arg version=v0.0.2
-ARG version=main
+ARG artifactory=1
 
-RUN apt-get update
+RUN test $artifactory -eq 1 \
+    && echo "deb [trusted=yes] http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/docker.com buster stable" > /etc/apt/sources.list \
+    || echo "docker build in dev environment" \
+    && apt-get update
 
 # 1. development packages
 RUN apt-get install -y \
@@ -64,8 +67,6 @@ RUN useradd -G www-data,root -u 1000 -d /home/devuser devuser
 RUN mkdir -p /home/devuser/.composer && \
     chown -R devuser:devuser /home/devuser
 
-#RUN cd /var/www/html && wget https://github.com/prosanteconnect/psc-api-maj/archive/$version.tar.gz && \
-#    tar -xzf $version.tar.gz --strip 1 && rm $version.tar.gz
 COPY . /var/www/html/
 
 # Setup working directory

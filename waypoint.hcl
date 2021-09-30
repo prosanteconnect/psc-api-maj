@@ -19,7 +19,9 @@ app "prosanteconnect/psc-api-maj" {
     # Build specifies how an application should be deployed. In this case,
     # we'll build using a Dockerfile and keeping it in a local registry.
     build {
-        use "docker" {}
+        use "docker" {
+            build_args = var.artifactory
+        }
         # Uncomment below to use a remote docker registry to push your built images.
         registry {
            use "docker" {
@@ -40,8 +42,14 @@ app "prosanteconnect/psc-api-maj" {
     }
 }
 
-
-variable datacenter {
+variable "datacenter" {
     type = string
     default = "dc1"
+}
+
+variable "artifactory" {
+    type = map
+    default = {
+        "artifactory" = "1"
+    }
 }
