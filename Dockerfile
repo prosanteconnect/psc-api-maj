@@ -4,7 +4,7 @@ FROM php:apache-buster
 ARG artifactory=1
 
 RUN test $artifactory -eq 1 \
-    && echo "deb [trusted=yes] http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/docker.com buster stable" > /etc/apt/sources.list \
+    && echo "deb [trusted=yes] http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/debian.org buster stable" > /etc/apt/sources.list \
     || echo "docker build in dev environment" \
     && apt-get update
 
