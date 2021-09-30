@@ -20,7 +20,9 @@ app "prosanteconnect/psc-api-maj" {
     # we'll build using a Dockerfile and keeping it in a local registry.
     build {
         use "docker" {
-            build_args = var.artifactory
+            build_args = {
+                "artifactory" = var.artifactory
+            }
         }
         # Uncomment below to use a remote docker registry to push your built images.
         registry {
@@ -48,8 +50,6 @@ variable "datacenter" {
 }
 
 variable "artifactory" {
-    type = map
-    default = {
-        "artifactory" = "1"
-    }
+    type = string
+    default = "1"
 }
