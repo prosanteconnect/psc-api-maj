@@ -28,7 +28,7 @@ app "prosanteconnect/psc-api-maj" {
         # Uncomment below to use a remote docker registry to push your built images.
         registry {
            use "docker" {
-             image = "prosanteconnect/psc-api-maj"
+             image = "https://registry-1.docker.io/v2/prosanteconnect/psc-api-maj"
              tag   = gitrefpretty()
              encoded_auth = filebase64("/secrets/dockerAuth.json")
            }
