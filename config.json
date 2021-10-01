@@ -1,0 +1,13 @@
+{
+    "repositories": [{
+            "type": "composer",
+            "url": "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/api/composer/composer"
+        },
+        {
+            "packagist": false
+        }
+    ],
+    "config": {
+            "secure-http" : false
+        }  
+}
