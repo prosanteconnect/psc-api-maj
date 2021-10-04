@@ -24,6 +24,10 @@ RUN apt-get install -y \
     libfreetype6-dev \
     libssl-dev \
     g++ \
+    zip \
+    zlib1g-dev \
+    libzip-dev \
+    unzip \
     supervisor \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/*
