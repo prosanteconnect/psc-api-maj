@@ -104,4 +104,3 @@ RUN sed -i '/^exec.*/i mv \/secrets\/.env \/var\/www\/html\/.env' /usr/local/bin
 RUN sed -i '/^exec.*/i php artisan migrate --force' /usr/local/bin/apache2-foreground
 
 RUN sed -i '/^exec.*/i service supervisor start' /usr/local/bin/apache2-foreground
-
