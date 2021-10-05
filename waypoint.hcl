@@ -64,7 +64,3 @@ variable "registry_path" {
     type = string
     default = "registry.repo.proxy-dev-forge.asip.hst.fluxus.net/prosanteconnect"
 }
-variable "registry_path" {
-    type = string
-    default = "registry.repo.proxy-dev-forge.asip.hst.fluxus.net/prosanteconnect"
-}
