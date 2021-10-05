@@ -1,5 +1,7 @@
 FROM php:apache-buster
 
+ARG proxy_address
+
 RUN  echo "deb [trusted=yes] http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/debian.org buster main" > /etc/apt/sources.list \
     && echo "deb [trusted=yes] http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/debian.org buster-updates main" >> /etc/apt/sources.list \
     && echo "deb [trusted=yes] http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/debian-security buster/updates main" >> /etc/apt/sources.list \
@@ -24,9 +26,16 @@ RUN apt-get install -y \
     libfreetype6-dev \
     libssl-dev \
     g++ \
+    zip \
+    zlib1g-dev \
+    libzip-dev \
+    unzip \
     supervisor \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-install zip
+ENV https_proxy=$proxy_address
 
 # 2. apache configs + document root
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
@@ -41,14 +50,9 @@ RUN a2enmod rewrite headers
 # 4. start with base php config, then add extensions
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
-RUN docker-php-ext-install \
-    pdo_mysql \
-    exif \
-    sockets
+RUN docker-php-ext-install pdo_mysql exif sockets
 
 WORKDIR /usr/src
-ARG proxy_address
-ENV https_proxy=$proxy_address
 RUN git clone https://github.com/mongodb/mongo-php-driver.git \
     && cd mongo-php-driver \
     && git checkout tags/1.10.0 -b v1.10 \
@@ -61,7 +65,10 @@ RUN git clone https://github.com/mongodb/mongo-php-driver.git \
     && echo "extension=mongodb.so" >> "$PHP_INI_DIR/php.ini"
 
 # 5. composer
+RUN useradd -G www-data,root -u 1000 -d /home/devuser devuser
 ENV COMPOSER_HOME /home/devuser/.composer
+RUN mkdir -p $COMPOSER_HOME
+
 ENV PATH ./vendor/bin:/composer/vendor/bin:$PATH
 ENV COMPOSER_ALLOW_SUPERUSER 1
 COPY installer .
@@ -69,13 +76,11 @@ RUN php installer --install-dir=/usr/local/bin/ --filename=composer --disable-tl
 
 # so when we execute CLI commands, all the host file's ownership remains intact
 # otherwise command from inside container will create root-owned files and directories
-ARG uid
-RUN useradd -G www-data,root -u 1000 -d /home/devuser devuser
-RUN mkdir -p $COMPOSER_HOME
 COPY config.json $COMPOSER_HOME
 RUN chown -R devuser:devuser /home/devuser
 RUN composer config --global home
 COPY . /var/www/html/
+RUN chown -R devuser /var/www/html
 
 # Setup working directory
 WORKDIR /var/www/html
@@ -104,4 +109,3 @@ RUN sed -i '/^exec.*/i mv \/secrets\/.env \/var\/www\/html\/.env' /usr/local/bin
 RUN sed -i '/^exec.*/i php artisan migrate --force' /usr/local/bin/apache2-foreground
 
 RUN sed -i '/^exec.*/i service supervisor start' /usr/local/bin/apache2-foreground
-
