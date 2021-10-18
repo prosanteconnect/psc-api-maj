@@ -16,12 +16,9 @@ job "psc-api-maj" {
         }
         update {
             max_parallel      = 1
-            canary            = 1
             min_healthy_time  = "30s"
             progress_deadline = "5m"
             healthy_deadline  = "2m"
-            auto_revert       = true
-            auto_promote      = true
         }
         network {
             mode = "host"
@@ -60,7 +57,6 @@ job "psc-api-maj" {
             }
             service {
                 name = "$\u007BNOMAD_JOB_NAME\u007D"
-                canary_tags = ["canary instance to promote"]
                 port = "http"
                 check {
                     type = "tcp"
