@@ -87,7 +87,7 @@ redirect_stderr=true\n\
 logfile=/dev/stdout\n\
 stopwaitsecs=3600' > /etc/supervisor/conf.d/default.conf
 
-RUN sed -i '/^exec.*/i mv \/secrets\/.env \/var\/www\/html\/.env' /usr/local/bin/apache2-foreground
+RUN sed -i '/^exec.*/i ln -s \/secrets\/.env \/var\/www\/html\/.env' /usr/local/bin/apache2-foreground
 
 # DANGER ZONE: DB migration on startup
 RUN sed -i '/^exec.*/i php artisan migrate --force' /usr/local/bin/apache2-foreground
