@@ -16,12 +16,9 @@ job "psc-api-maj" {
         }
         update {
             max_parallel      = 1
-            canary            = 1
             min_healthy_time  = "30s"
             progress_deadline = "5m"
             healthy_deadline  = "2m"
-            auto_revert       = true
-            auto_promote      = true
         }
         network {
             mode = "host"
@@ -41,7 +38,7 @@ job "psc-api-maj" {
                     APP_ENV=production
                     APP_KEY={{ with secret "psc-ecosystem/psc-api-maj" }}{{ .Data.data.app_key }}{{ end }}
                     APP_DEBUG=false
-                    APP_URL=http://{{ range service "psc-api-maj" }}{{ .Address }}:{{ .Port }}{{ end }}/api
+                    APP_URL=http://$\u007BNOMAD_ADDR_http\u007D/api
                     LOG_CHANNEL=errorlog
                     LOG_LEVEL=info
                     MONGO_DB_DATABASE=mongodb
@@ -52,7 +49,7 @@ job "psc-api-maj" {
                     QUEUE_CONNECTION=database
                 EOH
                 destination = "secrets/.env"
-                change_mode = "noop"  // this is a problem
+                change_mode = "restart"
                 env = true
             }
             resources {
@@ -61,7 +58,6 @@ job "psc-api-maj" {
             }
             service {
                 name = "$\u007BNOMAD_JOB_NAME\u007D"
-                canary_tags = ["canary instance to promote"]
                 port = "http"
                 check {
                     type = "tcp"
