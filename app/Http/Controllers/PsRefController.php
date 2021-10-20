@@ -8,7 +8,6 @@ use App\Models\PsRef;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-use Log;
 
 class PsRefController extends ApiController
 {
@@ -80,13 +79,7 @@ class PsRefController extends ApiController
 
     public function showAll(): JsonResponse
     {
-        $storedPsRefs = [];
-        PsRef::chunk(10000,function($psRefs) {
-            foreach($psRefs as $psRef) {
-                $storedPsRefs[] = $psRef;
-            }
-        });
-        Log::info("count of PsRefs : ".sizeOf($storedPsRefs))
+        $storedPsRefs = PsRef::all();
         return $this->successResponse($storedPsRefs);
     }
 
