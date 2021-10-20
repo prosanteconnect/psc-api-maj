@@ -81,7 +81,7 @@ class PsRefController extends ApiController
     {
         PsRef::chunk(10000,function($psRefs) {
             foreach($psRefs as $psRef) {
-                $storedPsRefs[] = $psRef 
+                $storedPsRefs[] = $psRef;
             }
         }
         return $this->successResponse($storedPsRefs);
