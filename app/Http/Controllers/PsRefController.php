@@ -79,7 +79,11 @@ class PsRefController extends ApiController
 
     public function showAll(): JsonResponse
     {
-        $storedPsRefs = PsRef::all();
+        PsRef::chunk(10000,function($psRefs) {
+            foreach($psRefs as $psRef) {
+                $storedPsRefs[] = $psRef 
+            }
+        }
         return $this->successResponse($storedPsRefs);
     }
 
