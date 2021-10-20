@@ -83,7 +83,7 @@ class PsRefController extends ApiController
             foreach($psRefs as $psRef) {
                 $storedPsRefs[] = $psRef;
             }
-        }
+        });
         return $this->successResponse($storedPsRefs);
     }
 
