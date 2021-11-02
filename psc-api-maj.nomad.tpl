@@ -38,6 +38,7 @@ job "psc-api-maj" {
                     APP_ENV=production
                     APP_KEY={{ with secret "psc-ecosystem/psc-api-maj" }}{{ .Data.data.app_key }}{{ end }}
                     APP_DEBUG=false
+                    APP_URL=http://$\u007BNOMAD_ADDR_http\u007D/api
                     LOG_CHANNEL=errorlog
                     LOG_LEVEL=info
                     MONGO_DB_DATABASE=mongodb
@@ -61,8 +62,9 @@ job "psc-api-maj" {
                 check {
                     type = "tcp"
                     port = "http"
-                    interval = "10s"
+                    interval = "30s"
                     timeout = "2s"
+                    failures_before_critical = 5
                 }
             }
         }
