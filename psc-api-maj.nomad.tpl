@@ -62,8 +62,9 @@ job "psc-api-maj" {
                 check {
                     type = "tcp"
                     port = "http"
-                    interval = "10s"
+                    interval = "30s"
                     timeout = "2s"
+                    failures_before_critical = 5
                 }
             }
         }
